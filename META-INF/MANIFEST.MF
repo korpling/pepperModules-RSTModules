@@ -1,0 +1,46 @@
+Manifest-Version: 1.0
+Service-Component: OSGI-INF/serviceComponents.xml
+Export-Package: de.hu_berlin.german.korpling.saltnpepper.pepperModules
+ .rstModules.exceptions;uses:="de.hu_berlin.german.korpling.saltnpeppe
+ r.pepper.pepperExceptions",de.hu_berlin.german.korpling.saltnpepper.p
+ epperModules.rstModules;uses:="org.eclipse.emf.common.util,de.hu_berl
+ in.german.korpling.saltnpepper.salt.saltCore,de.hu_berlin.german.korp
+ ling.saltnpepper.misc.rst,de.hu_berlin.german.korpling.saltnpepper.sa
+ lt.saltCommon.sDocumentStructure,org.osgi.service.log,de.hu_berlin.ge
+ rman.korpling.saltnpepper.salt.saltCommon.sCorpusStructure,de.hu_berl
+ in.german.korpling.saltnpepper.salt,de.hu_berlin.german.korpling.salt
+ npepper.misc.treetagger.tokenizer,de.hu_berlin.german.korpling.saltnp
+ epper.pepperModules.rstModules.exceptions,de.hu_berlin.german.korplin
+ g.saltnpepper.pepper.pepperExceptions,de.hu_berlin.german.korpling.sa
+ ltnpepper.pepper.pepperModules,org.osgi.framework,de.hu_berlin.german
+ .korpling.saltnpepper.pepper.pepperModules.impl,org.osgi.service.comp
+ onent,org.eclipse.emf.ecore.resource,de.hu_berlin.german.korpling.sal
+ tnpepper.misc.rst.resources,org.eclipse.emf.ecore.resource.impl"
+Built-By: Florian Zipser
+Tool: Bnd-0.0.357
+Bundle-Name: RSTModules
+Created-By: Apache Maven Bundle Plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Build-Jdk: 1.6.0_21
+Bundle-Version: 0.0.1.SNAPSHOT
+Bnd-LastModified: 1314986425677
+Bundle-ManifestVersion: 2
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Import-Package: de.hu_berlin.german.korpling.saltnpepper.misc.rst,de.h
+ u_berlin.german.korpling.saltnpepper.misc.rst.resources,de.hu_berlin.
+ german.korpling.saltnpepper.misc.treetagger.tokenizer,de.hu_berlin.ge
+ rman.korpling.saltnpepper.pepper.pepperExceptions,de.hu_berlin.german
+ .korpling.saltnpepper.pepper.pepperModules,de.hu_berlin.german.korpli
+ ng.saltnpepper.pepper.pepperModules.impl,de.hu_berlin.german.korpling
+ .saltnpepper.pepperModules.rstModules,de.hu_berlin.german.korpling.sa
+ ltnpepper.pepperModules.rstModules.exceptions,de.hu_berlin.german.kor
+ pling.saltnpepper.salt,de.hu_berlin.german.korpling.saltnpepper.salt.
+ saltCommon.sCorpusStructure,de.hu_berlin.german.korpling.saltnpepper.
+ salt.saltCommon.sDocumentStructure,de.hu_berlin.german.korpling.saltn
+ pepper.salt.saltCore,org.eclipse.emf.common.util,org.eclipse.emf.ecor
+ e.resource,org.eclipse.emf.ecore.resource.impl,org.osgi.framework;ver
+ sion="1.5",org.osgi.service.component;version="1.0",org.osgi.service.
+ log;version="1.3"
+Bundle-SymbolicName: de.hu_berlin.german.korpling.saltnpepper.pepperMo
+ dules.RSTModules;singleton:=true
+
