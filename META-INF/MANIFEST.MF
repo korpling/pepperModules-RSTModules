@@ -18,12 +18,12 @@ Export-Package: de.hu_berlin.german.korpling.saltnpepper.pepperModules
  tnpepper.misc.rst.resources,org.eclipse.emf.ecore.resource.impl"
 Built-By: Florian Zipser
 Tool: Bnd-0.0.357
-Bundle-Name: RSTModules
+Bundle-Name: pepperModules-RSTModules
 Created-By: Apache Maven Bundle Plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Build-Jdk: 1.6.0_21
+Build-Jdk: 1.7.0
 Bundle-Version: 0.0.1.SNAPSHOT
-Bnd-LastModified: 1316007069993
+Bnd-LastModified: 1322659840230
 Bundle-ManifestVersion: 2
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Import-Package: de.hu_berlin.german.korpling.saltnpepper.misc.rst,de.h
@@ -42,5 +42,5 @@ Import-Package: de.hu_berlin.german.korpling.saltnpepper.misc.rst,de.h
  sion="1.5",org.osgi.service.component;version="1.0",org.osgi.service.
  log;version="1.3"
 Bundle-SymbolicName: de.hu_berlin.german.korpling.saltnpepper.pepperMo
- dules.RSTModules;singleton:=true
+ dules-RSTModules;singleton:=true
 

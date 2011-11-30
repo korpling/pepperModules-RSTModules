@@ -187,7 +187,6 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 				this.getCorpusDefinition().setCorpusPath(this.getCorpusDefinition().getCorpusPath().trimSegments(1));
 			}
 			try {
-				
 				this.sDocumentResourceTable= this.createCorpusStructure(this.getCorpusDefinition().getCorpusPath(), null, RST_FILE_ENDINGS);
 			} catch (IOException e) {
 				throw new RSTImporterException(this.name+": Cannot start with importing corpus, because saome exception occurs: ",e);
