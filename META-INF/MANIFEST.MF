@@ -23,7 +23,7 @@ Created-By: Apache Maven Bundle Plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Build-Jdk: 1.7.0
 Bundle-Version: 0.0.1.SNAPSHOT
-Bnd-LastModified: 1322659840230
+Bnd-LastModified: 1322761859692
 Bundle-ManifestVersion: 2
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Import-Package: de.hu_berlin.german.korpling.saltnpepper.misc.rst,de.h
