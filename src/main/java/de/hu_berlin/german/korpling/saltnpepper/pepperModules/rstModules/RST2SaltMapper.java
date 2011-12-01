@@ -265,16 +265,16 @@ public class RST2SaltMapper
 			switch (this.getLanguage()) 
 			{
 				case EN:
-					tokenizer.setLngLang(TTTokenizer.TTLanguages.en);
+					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.en);
 					break;
 				case FR:
-					tokenizer.setLngLang(TTTokenizer.TTLanguages.fr);
+					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.fr);
 					break;
 				case DE:
-					tokenizer.setLngLang(TTTokenizer.TTLanguages.de);
+					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.de);
 					break;
 				case IT:
-					tokenizer.setLngLang(TTTokenizer.TTLanguages.it);
+					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.it);
 					break;
 
 				default:
@@ -303,6 +303,9 @@ public class RST2SaltMapper
 		}//maps all relations and creates artificial ones if neccessary
 	}
 	
+	/**
+	 * The TreeTaggerTokenizer to tokenize an untokenized primary text.
+	 */
 	private TTTokenizer tokenizer= null;
 	
 	

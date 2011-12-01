@@ -258,10 +258,10 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 		{//add a new property for abbreviation folder for mapper
 			if (this.props== null)
 				this.props= new Properties();
-			if (!this.props.containsKey(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER))
-			{//add abbreviation property if it does not exist so far 
-				this.props.setProperty(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER, this.getResources().toFileString());
-			}//add abbreviation property if it does not exist so far
+//			if (!this.props.containsKey(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER))
+//			{//add abbreviation property if it does not exist so far 
+//				this.props.setProperty(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER, this.getResources().toFileString());
+//			}//add abbreviation property if it does not exist so far
 				
 		}//add a new property for abbreviation folder for mapper
 	}
