@@ -63,7 +63,7 @@ public class RSTExporter extends PepperExporterImpl implements PepperExporter
 		{//for testing the symbolic name has to be set without osgi
 			if (	(this.getSymbolicName()==  null) ||
 					(this.getSymbolicName().equalsIgnoreCase("")))
-				this.setSymbolicName("de.hub.german.korpling.saltnpepper.pepper.RSTModules");
+				this.setSymbolicName("de.hu_berlin.german.korpling.saltnpepper.pepperModules-RSTModules");
 		}//for testing the symbolic name has to be set without osgi
 		
 		{//set list of formats supported by this module

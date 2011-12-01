@@ -59,7 +59,7 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
  * @version 1.0
  *
  */
-@Component(name="DOTImporterComponent", factory="PepperImporterComponentFactory")
+@Component(name="RSTImporterComponent", factory="PepperImporterComponentFactory")
 @Service(value=PepperImporter.class)
 public class RSTImporter extends PepperImporterImpl implements PepperImporter
 {
@@ -74,7 +74,7 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 		{//for testing the symbolic name has to be set without osgi
 			if (	(this.getSymbolicName()==  null) ||
 					(this.getSymbolicName().equalsIgnoreCase("")))
-				this.setSymbolicName("de.hub.german.korpling.saltnpepper.pepper.RSTModules");
+				this.setSymbolicName("de.hu_berlin.german.korpling.saltnpepper.pepperModules-RSTModules");
 		}//for testing the symbolic name has to be set without osgi
 		
 		{//set list of formats supported by this module
