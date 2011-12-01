@@ -243,7 +243,7 @@ public class RST2SaltMapper
 				abbFolder= props.getProperty(PROP_RST_IMPORTER_ABBFOLDER); 
 				if (abbFolder!= null)
 				{//abbreviation folder is set
-					this.tokenizer.setAbbriviationFolder(new File(abbFolder));
+					this.tokenizer.setAbbreviationFolder(new File(abbFolder));
 				}//abbreviation folder is set
 			}//user-defined abbreviation folder
 		}
