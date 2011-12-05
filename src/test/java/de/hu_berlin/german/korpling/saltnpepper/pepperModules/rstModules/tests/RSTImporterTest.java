@@ -37,7 +37,7 @@ public class RSTImporterTest extends PepperImporterTest
 		formatDef.setFormatVersion("1.0");
 		this.supportedFormatsCheck.add(formatDef);
 		
-		File tmpFolder= new File(System.getProperty("java.io.tmpdir")+System.nanoTime());
+		File tmpFolder= new File(System.getProperty("java.io.tmpdir")+"/"+System.nanoTime());
 		if (!tmpFolder.exists())
 			tmpFolder.mkdirs();		
 		this.setTemprorariesURI(URI.createFileURI(tmpFolder.getAbsolutePath()));
