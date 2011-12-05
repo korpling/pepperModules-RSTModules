@@ -20,7 +20,6 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 import java.io.File;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 
 import org.eclipse.emf.common.util.EList;
@@ -32,8 +31,8 @@ import de.hu_berlin.german.korpling.saltnpepper.misc.rst.RSTDocument;
 import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Relation;
 import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Segment;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer;
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.Token;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
+import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.Token;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.exceptions.RSTImporterException;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
@@ -174,28 +173,6 @@ public class RST2SaltMapper
 		return this.currentRSTDocument;
 	}
 // ================================================ end: current SDocument
-//// ================================================ start: language
-//	enum LANGUAGE {EN, FR, DE, IT};
-//	/**
-//	 * language of the text in RST-Document.
-//	 */
-//	private LANGUAGE language= LANGUAGE.DE;
-//	/**
-//	 * Returns the set language of the text in RST-Document.
-//	 * @return
-//	 */
-//	public LANGUAGE getLanguage() {
-//		return language;
-//	}
-//
-//	/**
-//	 * Sets language of the text in RST-Document.
-//	 * @param language
-//	 */
-//	public void setLanguage(LANGUAGE language) {
-//		this.language = language;
-//	}
-//// ================================================ end: language
 // ================================================ start: tokenizing
 	/**
 	 * Stores if a tokenization has to be done.
@@ -269,27 +246,6 @@ public class RST2SaltMapper
 	{
 		this.delegateProperties(props);
 		this.getCurrentSDocument().setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
-		
-//		{//initialize tokenizer
-//			switch (this.getLanguage()) 
-//			{
-//				case EN:
-//					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.en);
-//					break;
-//				case FR:
-//					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.fr);
-//					break;
-//				case DE:
-//					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.de);
-//					break;
-//				case IT:
-//					tokenizer.setLngLang(TTTokenizer.TT_LANGUAGES.it);
-//					break;
-//
-//				default:
-//					break;
-//			}
-//		}//initialize tokenizer
 			
 		{//map segments to STextualDS, Tokens and SStructures
 			if (this.getCurrentRSTDocument().getSegments().size()> 0)
