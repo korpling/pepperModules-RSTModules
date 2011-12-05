@@ -63,6 +63,19 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 @Service(value=PepperImporter.class)
 public class RSTImporter extends PepperImporterImpl implements PepperImporter
 {
+	/**
+	 * Special parameter property to determine if the primary data have to be tokenized. 
+	 */
+	public final static String PROP_RST_IMPORTER_TOKENIZE="rstImporter.tokenize";
+	/**
+	 * Special parameter property to set a folder containing abbreviations of several languages. Used for tokenization.
+	 */
+	public final static String PROP_RST_IMPORTER_ABBFOLDER="rstImporter.abbreviationFolder";
+	/**
+	 * Special parameter property to determine the language of primary text. Used for tokenization.
+	 */
+	public final static String PROP_RST_IMPORTER_LANGUAGE="rstImporter.language";
+	
 	public RSTImporter()
 	{
 		super();
@@ -73,7 +86,7 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 		
 		{//for testing the symbolic name has to be set without osgi
 			if (	(this.getSymbolicName()==  null) ||
-					(this.getSymbolicName().equalsIgnoreCase("")))
+					(this.getSymbolicName().isEmpty()))
 				this.setSymbolicName("de.hu_berlin.german.korpling.saltnpepper.pepperModules-RSTModules");
 		}//for testing the symbolic name has to be set without osgi
 		
@@ -424,7 +437,7 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 					Resource resource = resourceSet.createResource(rstDoc);
 					
 					if (resource== null)
-						throw new NullPointerException("Cannot load the exmaralda file: "+ rstDoc+", becuase the resource is null.");
+						throw new RSTImporterException("Cannot load the exmaralda file: "+ rstDoc+", becuase the resource is null.");
 					try {
 						resource.load(null);
 					} catch (IOException e) 
