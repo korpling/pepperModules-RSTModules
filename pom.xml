@@ -49,7 +49,7 @@
     <dependency>
     	<groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
     	<artifactId>misc-RSTModel</artifactId>
-    	<version>0.0.2-SNAPSHOT</version>
+    	<version>[0.0.1,)</version>
     	<type>bundle</type>
     	<scope>compile</scope>
     </dependency>
