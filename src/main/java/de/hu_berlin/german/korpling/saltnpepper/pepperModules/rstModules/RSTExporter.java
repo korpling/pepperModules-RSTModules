@@ -19,14 +19,9 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.eclipse.emf.common.util.BasicEList;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.log.LogService;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperExporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperExporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
@@ -55,29 +50,10 @@ public class RSTExporter extends PepperExporterImpl implements PepperExporter
 	public RSTExporter()
 	{
 		super();
-		
-		{//setting name of module
-			this.name= "RSTExporter";
-		}//setting name of module
-		
-		{//for testing the symbolic name has to be set without osgi
-			if (	(this.getSymbolicName()==  null) ||
-					(this.getSymbolicName().equalsIgnoreCase("")))
-				this.setSymbolicName("de.hu_berlin.german.korpling.saltnpepper.pepperModules-RSTModules");
-		}//for testing the symbolic name has to be set without osgi
-		
-		{//set list of formats supported by this module
-			this.supportedFormats= new BasicEList<FormatDefinition>();
-			FormatDefinition formatDef= PepperInterfaceFactory.eINSTANCE.createFormatDefinition();
-			formatDef.setFormatName("rs3");
-			formatDef.setFormatVersion("1.0");
-			this.supportedFormats.add(formatDef);
-		}
-		
-		{//just for logging: to say, that the current module has been loaded
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is created...");
-		}//just for logging: to say, that the current module has been loaded
+		//setting name of module
+		this.name= "RSTExporter";
+		//set list of formats supported by this module
+		this.addSupportedFormat("rs3", "1.0", null);
 	}
 	
 	/**
@@ -149,34 +125,6 @@ public class RSTExporter extends PepperExporterImpl implements PepperExporter
 	{
 		//TODO /8/: implement this method when necessary 
 		super.end();
-	}
-	
-//================================ start: methods used by OSGi
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets activated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void activate(ComponentContext componentContext) 
-	{
-		this.setSymbolicName(componentContext.getBundleContext().getBundle().getSymbolicName());
-		{//just for logging: to say, that the current module has been activated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is activated...");
-		}//just for logging: to say, that the current module has been activated
-	}
-
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets deactivated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		{//just for logging: to say, that the current module has been deactivated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is deactivated...");
-		}	
 	}
 //================================ start: methods used by OSGi
 }

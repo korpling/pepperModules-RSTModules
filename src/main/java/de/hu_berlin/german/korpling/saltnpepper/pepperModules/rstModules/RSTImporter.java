@@ -37,16 +37,13 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
 
 import de.hu_berlin.german.korpling.saltnpepper.misc.rst.RSTDocument;
 import de.hu_berlin.german.korpling.saltnpepper.misc.rst.resources.RSTResourceFactory;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperFWException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.FormatDefinition;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperInterfaceFactory;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.exceptions.RSTImporterException;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SCorpus;
@@ -79,29 +76,10 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 	public RSTImporter()
 	{
 		super();
-		
-		{//setting name of module
-			this.name= "RSTImporter";
-		}//setting name of module
-		
-		{//for testing the symbolic name has to be set without osgi
-			if (	(this.getSymbolicName()==  null) ||
-					(this.getSymbolicName().isEmpty()))
-				this.setSymbolicName("de.hu_berlin.german.korpling.saltnpepper.pepperModules-RSTModules");
-		}//for testing the symbolic name has to be set without osgi
-		
-		{//set list of formats supported by this module
-			this.supportedFormats= new BasicEList<FormatDefinition>();
-			FormatDefinition formatDef= PepperInterfaceFactory.eINSTANCE.createFormatDefinition();
-			formatDef.setFormatName("rs3");
-			formatDef.setFormatVersion("1.0");
-			this.supportedFormats.add(formatDef);
-		}
-		
-		{//just for logging: to say, that the current module has been loaded
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is created...");
-		}//just for logging: to say, that the current module has been loaded
+		//setting name of module
+		this.name= "RSTImporter";
+		//set list of formats supported by this module
+		this.addSupportedFormat("rs3", "1.0", null);
 	}
 	
 	//===================================== start: performance variables
@@ -494,33 +472,4 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 			this.getLogService().log(LogService.LOG_DEBUG, msg.toString());
 		}
 	}
-	
-//================================ start: methods used by OSGi
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets activated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void activate(ComponentContext componentContext) 
-	{
-		this.setSymbolicName(componentContext.getBundleContext().getBundle().getSymbolicName());
-		{//just for logging: to say, that the current module has been activated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is activated...");
-		}//just for logging: to say, that the current module has been activated
-	}
-
-	/**
-	 * This method is called by the OSGi framework, when a component with this class as class-entry
-	 * gets deactivated.
-	 * @param componentContext OSGi-context of the current component
-	 */
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		{//just for logging: to say, that the current module has been deactivated
-			if (this.getLogService()!= null)
-				this.getLogService().log(LogService.LOG_DEBUG,this.getName()+" is deactivated...");
-		}	
-	}
-//================================ start: methods used by OSGi
 }
