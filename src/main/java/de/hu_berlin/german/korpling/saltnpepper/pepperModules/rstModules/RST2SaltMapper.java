@@ -207,9 +207,9 @@ public class RST2SaltMapper
 				tokenize= props.getProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE); 
 				if (tokenize!= null)
 				{
-					if (tokenize.equalsIgnoreCase("yes"))
+					if ("yes".equalsIgnoreCase(tokenize))
 						this.isToTokenize(true);
-					else if (tokenize.equalsIgnoreCase("no"))
+					else if ("no".equalsIgnoreCase(tokenize))
 					{
 						this.isToTokenize(false);
 					}
@@ -450,16 +450,13 @@ public class RST2SaltMapper
 				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getSource().getId()+"'.");
 			
 			if (	(	(relation.getType()!= null)&&
-						(relation.getType().equalsIgnoreCase("span")))||
+						("span".equalsIgnoreCase(relation.getType())))||
 					(	(relation.getName()!= null)&&
-						(relation.getName().equalsIgnoreCase("span")))	)
+						("span".equalsIgnoreCase(relation.getName())))	)
 			{//either name or type is "span"
 				SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
 				//TODO delete the comment and delete the creation of dominance relation
-//				sDomRel.addSType(relation.getType());
-				{//interim solution
-					sDomRel.addSType("edge");
-				}//interim solution
+				sDomRel.addSType(relation.getType());
 				sDomRel.setSSource(sSource);
 				sDomRel.setSTarget(sTarget);
 				this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
@@ -468,10 +465,7 @@ public class RST2SaltMapper
 				{//add annotation to relation
 					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
 					//TODO delete the comment and delete the creation of dominance relation
-//					sAnno.setSName("name");
-					{//interim solution
-						sAnno.setSName("func");
-					}//interim solution
+					sAnno.setSName("name");
 					sAnno.setSValue(relation.getName());
 					sDomRel.addSAnnotation(sAnno);
 				}//add annotation to relation
@@ -483,11 +477,12 @@ public class RST2SaltMapper
 				SRelation sRel= null;
 				//TODO delete the comment and delete the creation of dominance relation
 //				sRel= SaltFactory.eINSTANCE.createSPointingRelation();
-//				sRel.addSType(relation.getType());
-				{//interim solution
-					sRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-					sRel.addSType("secedge");
-				}//interim solution
+				sRel= SaltFactory.eINSTANCE.createSDominanceRelation();
+				sRel.addSType(relation.getType());
+//				{//interim solution
+//					sRel= SaltFactory.eINSTANCE.createSDominanceRelation();
+//					sRel.addSType("secedge");
+//				}//interim solution
 				
 				sRel.setSSource(sSource);
 				sRel.setSTarget(sTarget);
@@ -496,11 +491,7 @@ public class RST2SaltMapper
 				if (relation.getName()!= null)
 				{//add annotation to relation
 					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-					//TODO delete the comment and delete the creation of dominance relation
-//					sAnno.setSName("type");
-					{//interim solution
-						sAnno.setSName("func");
-					}//interim solution
+					sAnno.setSName("type");
 					sAnno.setSValue(relation.getName());
 					sRel.addSAnnotation(sAnno);
 				}//add annotation to relation
@@ -538,10 +529,10 @@ public class RST2SaltMapper
 
 					SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
 					//TODO delete the comment and delete the creation of dominance relation
-//					sDomRel.addSType(relation.getType());
-					{//interim solution
-						sDomRel.addSType("edge");
-					}//interim solution
+					sDomRel.addSType(relation.getType());
+//					{//interim solution
+//						sDomRel.addSType("edge");
+//					}//interim solution
 					sDomRel.setSSource(parentNode);
 					sDomRel.setSTarget(sTarget);
 					this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
@@ -549,11 +540,7 @@ public class RST2SaltMapper
 					if (incomingRelation.getName()!= null)
 					{//add annotation to relation
 						SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-						//TODO delete the comment and delete the creation of dominance relation
-//						sAnno.setSName("type");
-						{//interim solution
-							sAnno.setSName("func");
-						}//interim solution
+						sAnno.setSName("type");
 						sAnno.setSValue(relation.getName());
 						sDomRel.addSAnnotation(sAnno);
 					}//add annotation to relation
