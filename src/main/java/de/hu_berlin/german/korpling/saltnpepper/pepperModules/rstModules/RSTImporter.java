@@ -17,12 +17,9 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
@@ -39,8 +36,8 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.osgi.service.log.LogService;
 
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.RSTDocument;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.resources.RSTResourceFactory;
+import de.hu_berlin.german.korpling.rst.RSTDocument;
+import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperFWException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperExceptions.PepperModuleException;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
@@ -60,18 +57,18 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 @Service(value=PepperImporter.class)
 public class RSTImporter extends PepperImporterImpl implements PepperImporter
 {
-	/**
-	 * Special parameter property to determine if the primary data have to be tokenized. 
-	 */
-	public final static String PROP_RST_IMPORTER_TOKENIZE="rstImporter.tokenize";
-	/**
-	 * Special parameter property to set a folder containing abbreviations of several languages. Used for tokenization.
-	 */
-	public final static String PROP_RST_IMPORTER_ABBFOLDER="rstImporter.abbreviationFolder";
-	/**
-	 * Special parameter property to determine the language of primary text. Used for tokenization.
-	 */
-	public final static String PROP_RST_IMPORTER_LANGUAGE="rstImporter.language";
+//	/**
+//	 * Special parameter property to determine if the primary data have to be tokenized. 
+//	 */
+//	public final static String PROP_RST_IMPORTER_TOKENIZE="rstImporter.tokenize";
+//	/**
+//	 * Special parameter property to set a folder containing abbreviations of several languages. Used for tokenization.
+//	 */
+//	public final static String PROP_RST_IMPORTER_ABBFOLDER="rstImporter.abbreviationFolder";
+//	/**
+//	 * Special parameter property to determine the language of primary text. Used for tokenization.
+//	 */
+//	public final static String PROP_RST_IMPORTER_LANGUAGE="rstImporter.language";
 	
 	public RSTImporter()
 	{
@@ -152,10 +149,10 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 	 */
 	public static final String PROP_RUN_IN_PARALLEL="rstImporter.runInParallel";
 // ========================== end: flagging for parallel running
-	/**
-	 * a property representation of a property file
-	 */
-	protected Properties props= null;
+//	/**
+//	 * a property representation of a property file
+//	 */
+//	protected Properties props= null;
 	
 	/**
 	 * Stores relation between documents and their resource 
@@ -207,55 +204,52 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 	}
 	
 // ========================== end: extract corpus-path
-	/**
-	 * Extracts properties out of given special parameters.
-	 */
-	private void exctractProperties()
-	{
-		if (this.getSpecialParams()!= null)
-		{//check if flag for running in parallel is set
-			if (this.getSpecialParams().toFileString()== null)
-				throw new RSTImporterException("Can not read special parameter, because they are not in URI syntax (e.g. file:/c:/folder/file.prop).");
-			File propFile= new File(this.getSpecialParams().toFileString());
-			this.props= new Properties();
-			try{
-				this.props.load(new FileInputStream(propFile));
-			}catch (Exception e)
-			{throw new RSTImporterException("Cannot find input file for properties: "+propFile+"\n nested exception: "+ e.getMessage());}
-			if (this.props.containsKey(PROP_RUN_IN_PARALLEL))
-			{
-				try {
-					Boolean val= new Boolean(this.props.getProperty(PROP_RUN_IN_PARALLEL));
-					this.setRUN_IN_PARALLEL(val);
-				} catch (Exception e) 
-				{
-					if (this.getLogService()!= null)
-						this.getLogService().log(LogService.LOG_WARNING, "Cannot set correct property value of property "+PROP_RUN_IN_PARALLEL+" to "+this.getName()+", because of the value is not castable to Boolean. A correct value can contain 'true' or 'false'.");
-				}
-			}
-			else if (this.props.containsKey(PROP_NUM_OF_PARALLEL_DOCUMENTS))
-			{
-				try {
-					Integer val= new Integer(this.props.getProperty(PROP_NUM_OF_PARALLEL_DOCUMENTS));
-					if (val > 0)
-						this.setNumOfParallelDocuments(val);
-				} catch (Exception e) 
-				{
-					if (this.getLogService()!= null)
-						this.getLogService().log(LogService.LOG_WARNING, "Cannot set correct property value of property "+PROP_NUM_OF_PARALLEL_DOCUMENTS+" to "+this.getName()+", because of the value is not castable to Integer. A correct value must be a positiv, whole number (>0).");
-				}
-			}
-		}//check if flag for running in parallel is set
-		{//add a new property for abbreviation folder for mapper
-			if (this.props== null)
-				this.props= new Properties();
-//			if (!this.props.containsKey(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER))
-//			{//add abbreviation property if it does not exist so far 
-//				this.props.setProperty(RST2SaltMapper.PROP_RST_IMPORTER_ABBFOLDER, this.getResources().toFileString());
-//			}//add abbreviation property if it does not exist so far
-				
-		}//add a new property for abbreviation folder for mapper
-	}
+//	/**
+//	 * Extracts properties out of given special parameters.
+//	 */
+//	private void exctractProperties()
+//	{
+//		if (this.getSpecialParams()!= null)
+//		{//check if flag for running in parallel is set
+//			if (this.getSpecialParams().toFileString()== null)
+//				throw new RSTImporterException("Can not read special parameter, because they are not in URI syntax (e.g. file:/c:/folder/file.prop).");
+//			File propFile= new File(this.getSpecialParams().toFileString());
+////			this.props= new Properties();
+////			try{
+////				this.props.load(new FileInputStream(propFile));
+////			}catch (Exception e)
+////			{throw new RSTImporterException("Cannot find input file for properties: "+propFile+"\n nested exception: "+ e.getMessage());}
+//			
+//			
+//			if (this.props.containsKey(PROP_RUN_IN_PARALLEL))
+//			{
+//				try {
+//					Boolean val= new Boolean(this.props.getProperty(PROP_RUN_IN_PARALLEL));
+//					this.setRUN_IN_PARALLEL(val);
+//				} catch (Exception e) 
+//				{
+//					if (this.getLogService()!= null)
+//						this.getLogService().log(LogService.LOG_WARNING, "Cannot set correct property value of property "+PROP_RUN_IN_PARALLEL+" to "+this.getName()+", because of the value is not castable to Boolean. A correct value can contain 'true' or 'false'.");
+//				}
+//			}
+//			else if (this.props.containsKey(PROP_NUM_OF_PARALLEL_DOCUMENTS))
+//			{
+//				try {
+//					Integer val= new Integer(this.props.getProperty(PROP_NUM_OF_PARALLEL_DOCUMENTS));
+//					if (val > 0)
+//						this.setNumOfParallelDocuments(val);
+//				} catch (Exception e) 
+//				{
+//					if (this.getLogService()!= null)
+//						this.getLogService().log(LogService.LOG_WARNING, "Cannot set correct property value of property "+PROP_NUM_OF_PARALLEL_DOCUMENTS+" to "+this.getName()+", because of the value is not castable to Integer. A correct value must be a positiv, whole number (>0).");
+//				}
+//			}
+//		}//check if flag for running in parallel is set
+//		{//add a new property for abbreviation folder for mapper
+//			if (this.props== null)
+//				this.props= new Properties();
+//		}//add a new property for abbreviation folder for mapper
+//	}
 	
 	/**
 	 * ThreadPool
@@ -269,9 +263,9 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 	public void start() throws PepperModuleException
 	{
 		this.mapperRunners= new BasicEList<MapperRunner>();
-		{//extracts special parameters
-			this.exctractProperties();
-		}//extracts special parameters
+//		{//extracts special parameters
+//			this.exctractProperties();
+//		}//extracts special parameters
 		{//initialize ThreadPool
 			executorService= Executors.newFixedThreadPool(this.getNumOfParallelDocuments());
 		}//initialize ThreadPool
@@ -327,8 +321,7 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter
 					mapperRunner.mapper= mapper;
 					mapperRunner.sDocument= sDocument;
 					//set properties
-					if (this.props!= null)
-						mapper.setProps(props);
+					mapper.setProps((RSTImporterProperties)this.getProperties());
 //					mapper.setRST_FILE_ENDINGS(RST_FILE_ENDINGS);
 					mapper.setCurrentSDocument(sDocument);
 					mapper.setLogService(this.getLogService());

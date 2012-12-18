@@ -20,27 +20,25 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 import java.io.File;
 import java.util.Properties;
 
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RST2SaltMapper;
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporter;
-
 import junit.framework.TestCase;
+import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
+import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
 public class RST2SaltMapperTest extends TestCase{
 
-	protected RST2SaltMapper fixture= null;
+	protected RSTImporterProperties fixture= null;
 
-	public RST2SaltMapper getFixture() {
+	public RSTImporterProperties getFixture() {
 		return fixture;
 	}
 
-	public void setFixture(RST2SaltMapper fixture) {
+	public void setFixture(RSTImporterProperties fixture) {
 		this.fixture = fixture;
 	}
 	
 	public void setUp()
 	{
-		this.setFixture(new RST2SaltMapper());
+		this.setFixture(new RSTImporterProperties());
 	}
 	
 	/**
@@ -48,24 +46,25 @@ public class RST2SaltMapperTest extends TestCase{
 	 */
 	public void testProperties()
 	{
-		assertTrue(this.getFixture().isToTokenize());
-		assertNull(this.getFixture().getTokenizer().getAbbreviationFolder());
-		assertEquals(null, this.getFixture().getTokenizer().getLngLang());
-		
 		Properties props= new Properties();
-		this.getFixture().setProps(props);
+		this.getFixture().addProperties(props);
 		
+		assertTrue(this.getFixture().isToTokenize());
+		assertNull(this.getFixture().getAbbreviationFolder());
+		assertNull(this.getFixture().getLanguage());
+		
+		this.setFixture(new RSTImporterProperties());
 		File abbrFolder= new File("/home/me/abbreviation");
-		TT_LANGUAGES lang= TT_LANGUAGES.DE;
+		String lang= TT_LANGUAGES.DE.toString();
 		String toTokenize= "no";
 		
-		props.setProperty(RSTImporter.PROP_RST_IMPORTER_ABBFOLDER, abbrFolder.getAbsolutePath());
-		props.setProperty(RSTImporter.PROP_RST_IMPORTER_LANGUAGE, lang.toString());
-		props.setProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE, toTokenize);
-		this.getFixture().setProps(props);
+		props.setProperty(RSTImporterProperties.PROP_ABBFOLDER, abbrFolder.getAbsolutePath());
+		props.setProperty(RSTImporterProperties.PROP_LANGUAGE, lang.toString());
+		props.setProperty(RSTImporterProperties.PROP_TOKENIZE, toTokenize);
+		this.getFixture().addProperties(props);
 		
-		assertEquals(lang, this.getFixture().getTokenizer().getLngLang());
-		assertEquals(abbrFolder.getAbsoluteFile(), this.getFixture().getTokenizer().getAbbreviationFolder());
+		assertEquals(lang, this.getFixture().getLanguage());
+		assertEquals(abbrFolder.getAbsoluteFile(), this.getFixture().getAbbreviationFolder());
 		assertEquals(Boolean.FALSE, this.getFixture().isToTokenize());
 	}
 }

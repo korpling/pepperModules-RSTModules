@@ -17,19 +17,17 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
-import java.io.File;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.log.LogService;
 
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Group;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.RSTDocument;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Relation;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Segment;
+import de.hu_berlin.german.korpling.rst.Group;
+import de.hu_berlin.german.korpling.rst.RSTDocument;
+import de.hu_berlin.german.korpling.rst.Relation;
+import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.Token;
@@ -80,6 +78,17 @@ public class RST2SaltMapper
 	{
 		this.tokenizer= new TTTokenizer();
 		this.rstId2SStructure= new Hashtable<String, SStructure>();
+		
+		
+		if (this.getProps().getAbbreviationFolder()!= null)
+		{//abbreviation folder is set
+			this.tokenizer.setAbbreviationFolder(this.getProps().getAbbreviationFolder());
+		}//abbreviation folder is set
+		if (this.getProps().getLanguage()!= null)
+		{//abbreviation folder is set
+			if (TT_LANGUAGES.valueOf(this.getProps().getLanguage())!= null)
+				this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(this.getProps().getLanguage()));
+		}//abbreviation folder is set
 	}
 	
 // ================================================ start: LogService	
@@ -99,22 +108,21 @@ public class RST2SaltMapper
 	/**
 	 * properties for the mapping.
 	 */
-	private Properties props= null;
+	private RSTImporterProperties props= null;
 	/**
 	 * Sets properties for the mapping.
 	 * @param props the props to set
 	 */
-	public void setProps(Properties props) 
+	public void setProps(RSTImporterProperties props) 
 	{
 		this.props = props;
-		this.delegateProperties(props);
 	}
 
 	/**
 	 * Returns the set properties for the mapping.
 	 * @return the props
 	 */
-	public Properties getProps() {
+	public RSTImporterProperties getProps() {
 		return props;
 	}
 	
@@ -173,67 +181,67 @@ public class RST2SaltMapper
 		return this.currentRSTDocument;
 	}
 // ================================================ end: current SDocument
-// ================================================ start: tokenizing
-	/**
-	 * Stores if a tokenization has to be done.
-	 */
-	private Boolean isToTokenize= true;
-	/**
-	 * Sets if a tokenization has to be done.
-	 * @param isToTokenize the isToTokenize to set
-	 */
-	public void isToTokenize(Boolean isToTokenize) {
-		this.isToTokenize = isToTokenize;
-	}
-
-	/**
-	 * Returns if a tokenization has to be done.
-	 * @return the isToTokenize
-	 */
-	public Boolean isToTokenize() {
-		return isToTokenize;
-	}
-	
-// ================================================ end: tokenizing
-	/**
-	 * Reads the properties given with props and sets all contained values.
-	 */
-	private void delegateProperties(Properties props)
-	{
-		if (props!= null)
-		{
-			{//tokenization
-				String tokenize= null;
-				tokenize= props.getProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE); 
-				if (tokenize!= null)
-				{
-					if ("yes".equalsIgnoreCase(tokenize))
-						this.isToTokenize(true);
-					else if ("no".equalsIgnoreCase(tokenize))
-					{
-						this.isToTokenize(false);
-					}
-				}
-			}//tokenization
-			{//user-defined abbreviation folder
-				String abbFolder= null;
-				abbFolder= props.getProperty(RSTImporter.PROP_RST_IMPORTER_ABBFOLDER); 
-				if (abbFolder!= null)
-				{//abbreviation folder is set
-					this.tokenizer.setAbbreviationFolder(new File(abbFolder));
-				}//abbreviation folder is set
-			}//user-defined abbreviation folder
-			{//language
-				String lang= null;
-				lang= props.getProperty(RSTImporter.PROP_RST_IMPORTER_LANGUAGE);
-				if (lang!= null)
-				{//abbreviation folder is set
-					if (TT_LANGUAGES.valueOf(lang)!= null)
-						this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(lang));
-				}//abbreviation folder is set
-			}//language
-		}
-	}
+//// ================================================ start: tokenizing
+//	/**
+//	 * Stores if a tokenization has to be done.
+//	 */
+//	private Boolean isToTokenize= true;
+//	/**
+//	 * Sets if a tokenization has to be done.
+//	 * @param isToTokenize the isToTokenize to set
+//	 */
+//	public void isToTokenize(Boolean isToTokenize) {
+//		this.isToTokenize = isToTokenize;
+//	}
+//
+//	/**
+//	 * Returns if a tokenization has to be done.
+//	 * @return the isToTokenize
+//	 */
+//	public Boolean isToTokenize() {
+//		return isToTokenize;
+//	}
+//	
+//// ================================================ end: tokenizing
+//	/**
+//	 * Reads the properties given with props and sets all contained values.
+//	 */
+//	private void delegateProperties(Properties props)
+//	{
+//		if (props!= null)
+//		{
+//			{//tokenization
+//				String tokenize= null;
+//				tokenize= props.getProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE); 
+//				if (tokenize!= null)
+//				{
+//					if ("yes".equalsIgnoreCase(tokenize))
+//						this.isToTokenize(true);
+//					else if ("no".equalsIgnoreCase(tokenize))
+//					{
+//						this.isToTokenize(false);
+//					}
+//				}
+//			}//tokenization
+//			{//user-defined abbreviation folder
+//				String abbFolder= null;
+//				abbFolder= props.getProperty(RSTImporter.PROP_RST_IMPORTER_ABBFOLDER); 
+//				if (abbFolder!= null)
+//				{//abbreviation folder is set
+//					this.tokenizer.setAbbreviationFolder(new File(abbFolder));
+//				}//abbreviation folder is set
+//			}//user-defined abbreviation folder
+//			{//language
+//				String lang= null;
+//				lang= props.getProperty(RSTImporter.PROP_RST_IMPORTER_LANGUAGE);
+//				if (lang!= null)
+//				{//abbreviation folder is set
+//					if (TT_LANGUAGES.valueOf(lang)!= null)
+//						this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(lang));
+//				}//abbreviation folder is set
+//			}//language
+//		}
+//	}
 	
 	/**
 	 * stores the rstId of an AbstractNode and the corresponding SStructure mapped to the AbstractNode
@@ -244,28 +252,28 @@ public class RST2SaltMapper
 	 */
 	public void mapRSTDocument2SDocument()
 	{
-		this.delegateProperties(props);
+//		this.delegateProperties(props);
 		this.getCurrentSDocument().setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
 			
-		{//map segments to STextualDS, Tokens and SStructures
+		//map segments to STextualDS, Tokens and SStructures
 			if (this.getCurrentRSTDocument().getSegments().size()> 0)
 			{	
-				if (this.isToTokenize)
+				if (this.getProps().isToTokenize())
 					this.mapSegmentsWithTokenize(this.getCurrentRSTDocument().getSegments());
 				else
 					this.mapSegmentsWithoutTokenize(this.getCurrentRSTDocument().getSegments());
 			}
-		}//map segments to STextualDS, Tokens and SStructures
-		{//map group to SStructure
+		//map segments to STextualDS, Tokens and SStructures
+		//map group to SStructure
 			for (Group group: this.getCurrentRSTDocument().getGroups())
 				this.mapGroup2SStructure(group);
-		}//map group to SStructure
-		{//maps all relations and creates artificial ones if neccessary
+		//map group to SStructure
+		//maps all relations and creates artificial ones if neccessary
 			for (Relation relation: this.getCurrentRSTDocument().getRelations())
 			{
 				this.mapRelation(relation);
 			}
-		}//maps all relations and creates artificial ones if neccessary
+		//maps all relations and creates artificial ones if neccessary
 	}
 	
 	/**
@@ -307,7 +315,6 @@ public class RST2SaltMapper
 				}
 				catch (Exception e) 
 				{
-					e.printStackTrace();
 					throw new RSTImporterException("Cannot tokenize the following sentence: "+segment.getText(), e);
 				}				
 				if (	(tokens!= null)&&
@@ -443,11 +450,11 @@ public class RST2SaltMapper
 				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
 			
 			SStructure sSource= this.rstId2SStructure.get(relation.getParent().getId());
-			SStructure sTarget= this.rstId2SStructure.get(relation.getSource().getId());
+			SStructure sTarget= this.rstId2SStructure.get(relation.getChild().getId());
 			if (sSource== null)
 				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation points to a non existing node with id '"+relation.getParent().getId()+"'.");
 			if (sTarget== null)
-				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getSource().getId()+"'.");
+				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getChild().getId()+"'.");
 			
 			if (	(	(relation.getType()!= null)&&
 						("span".equalsIgnoreCase(relation.getType())))||
@@ -508,7 +515,7 @@ public class RST2SaltMapper
 	 */
 	private void createTransitiveRelations(Relation relation, SStructure parentNode)
 	{
-		EList<Relation> incomingRelations= this.getCurrentRSTDocument().getIncomingRelations(relation.getSource().getId());
+		EList<Relation> incomingRelations= this.getCurrentRSTDocument().getIncomingRelations(relation.getChild().getId());
 		if (incomingRelations!= null)
 		{
 			for (Relation incomingRelation: incomingRelations)
@@ -523,9 +530,9 @@ public class RST2SaltMapper
 					if (relation.getParent()== null)
 						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
 					
-					SStructure sTarget= this.rstId2SStructure.get(incomingRelation.getSource().getId());
+					SStructure sTarget= this.rstId2SStructure.get(incomingRelation.getChild().getId());
 					if (sTarget== null)
-						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getSource().getId()+"'.");
+						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getChild().getId()+"'.");
 
 					SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
 					//TODO delete the comment and delete the creation of dominance relation
