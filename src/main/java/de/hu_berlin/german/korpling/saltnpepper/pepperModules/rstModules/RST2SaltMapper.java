@@ -78,17 +78,6 @@ public class RST2SaltMapper
 	{
 		this.tokenizer= new TTTokenizer();
 		this.rstId2SStructure= new Hashtable<String, SStructure>();
-		
-		
-		if (this.getProps().getAbbreviationFolder()!= null)
-		{//abbreviation folder is set
-			this.tokenizer.setAbbreviationFolder(this.getProps().getAbbreviationFolder());
-		}//abbreviation folder is set
-		if (this.getProps().getLanguage()!= null)
-		{//abbreviation folder is set
-			if (TT_LANGUAGES.valueOf(this.getProps().getLanguage())!= null)
-				this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(this.getProps().getLanguage()));
-		}//abbreviation folder is set
 	}
 	
 // ================================================ start: LogService	
@@ -181,67 +170,24 @@ public class RST2SaltMapper
 		return this.currentRSTDocument;
 	}
 // ================================================ end: current SDocument
-//// ================================================ start: tokenizing
-//	/**
-//	 * Stores if a tokenization has to be done.
-//	 */
-//	private Boolean isToTokenize= true;
-//	/**
-//	 * Sets if a tokenization has to be done.
-//	 * @param isToTokenize the isToTokenize to set
-//	 */
-//	public void isToTokenize(Boolean isToTokenize) {
-//		this.isToTokenize = isToTokenize;
-//	}
-//
-//	/**
-//	 * Returns if a tokenization has to be done.
-//	 * @return the isToTokenize
-//	 */
-//	public Boolean isToTokenize() {
-//		return isToTokenize;
-//	}
-//	
-//// ================================================ end: tokenizing
-//	/**
-//	 * Reads the properties given with props and sets all contained values.
-//	 */
-//	private void delegateProperties(Properties props)
-//	{
-//		if (props!= null)
-//		{
-//			{//tokenization
-//				String tokenize= null;
-//				tokenize= props.getProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE); 
-//				if (tokenize!= null)
-//				{
-//					if ("yes".equalsIgnoreCase(tokenize))
-//						this.isToTokenize(true);
-//					else if ("no".equalsIgnoreCase(tokenize))
-//					{
-//						this.isToTokenize(false);
-//					}
-//				}
-//			}//tokenization
-//			{//user-defined abbreviation folder
-//				String abbFolder= null;
-//				abbFolder= props.getProperty(RSTImporter.PROP_RST_IMPORTER_ABBFOLDER); 
-//				if (abbFolder!= null)
-//				{//abbreviation folder is set
-//					this.tokenizer.setAbbreviationFolder(new File(abbFolder));
-//				}//abbreviation folder is set
-//			}//user-defined abbreviation folder
-//			{//language
-//				String lang= null;
-//				lang= props.getProperty(RSTImporter.PROP_RST_IMPORTER_LANGUAGE);
-//				if (lang!= null)
-//				{//abbreviation folder is set
-//					if (TT_LANGUAGES.valueOf(lang)!= null)
-//						this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(lang));
-//				}//abbreviation folder is set
-//			}//language
-//		}
-//	}
+	
+	private void setParams()
+	{
+		if (this.getProps()== null)
+		{
+			if (this.getLogService()!= null)
+				this.getLogService().log(LogService.LOG_WARNING, "No customization is given.");
+		}
+		if (this.getProps().getAbbreviationFolder()!= null)
+		{//abbreviation folder is set
+			this.tokenizer.setAbbreviationFolder(this.getProps().getAbbreviationFolder());
+		}//abbreviation folder is set
+		if (this.getProps().getLanguage()!= null)
+		{//abbreviation folder is set
+			if (TT_LANGUAGES.valueOf(this.getProps().getLanguage())!= null)
+				this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(this.getProps().getLanguage()));
+		}//abbreviation folder is set
+	}
 	
 	/**
 	 * stores the rstId of an AbstractNode and the corresponding SStructure mapped to the AbstractNode
@@ -252,7 +198,7 @@ public class RST2SaltMapper
 	 */
 	public void mapRSTDocument2SDocument()
 	{
-//		this.delegateProperties(props);
+		setParams();
 		this.getCurrentSDocument().setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
 			
 		//map segments to STextualDS, Tokens and SStructures
