@@ -27,7 +27,7 @@
   <parent>
     <groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
     <artifactId>pepper-parentModule</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5-SNAPSHOT</version>
   </parent>
   <scm>
     <developerConnection>scm:svn:https://korpling.german.hu-berlin.de/svn/saltnpepper/PepperModules/RSTModules/trunk</developerConnection>
@@ -42,11 +42,21 @@
     </repository>
   </distributionManagement>
   <dependencies>
-    <dependency>
+   <dependency>
       <groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
       <artifactId>misc-TreetaggerModel</artifactId>
       <version>[1.2.0,)</version>
     </dependency>
+  
+    <dependency>
+    	<groupId>de.hu_berlin.german.korpling</groupId>
+    	<artifactId>rst-api</artifactId>
+    	<version>0.0.2-SNAPSHOT</version>
+    	<type>bundle</type>
+    	<scope>compile</scope>
+    </dependency>
+  
+    <!--  
     <dependency>
     	<groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
     	<artifactId>misc-RSTModel</artifactId>
@@ -54,6 +64,8 @@
     	<type>bundle</type>
     	<scope>compile</scope>
     </dependency>
+      -->
+  
   </dependencies>
   <build>
   	<plugins>

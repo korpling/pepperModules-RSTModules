@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+    <info>
+        <title>RSTModules</title>
+        <subtitle>User's Guide</subtitle>
+        <authorgroup>
+            <author>
+                <personname>
+                    <firstname>Florian</firstname>
+                    <surname>Zipser</surname>
+                </personname>
+                <email>saltnpepper@lists.hu-berlin.de</email>
+            </author>
+            <author>
+                <personname>
+                    <firstname>Mario</firstname>
+                    <surname>Frank</surname>
+                </personname>
+                <email>saltnpepper@lists.hu-berlin.de</email>
+            </author>
+            <author>
+                <orgname xml:id="org1">INRIA</orgname>
+            </author>
+            <author>
+                <orgname xml:id="org2">SFB 632 Information Structure / D1 Linguistic
+                    Database</orgname>
+            </author>
+            <author>
+                <orgname xml:id="org3">Humboldt-Universität zu Berlin</orgname>
+            </author>
+            <author>
+                <orgname xml:id="org4">Universität Potsdam</orgname>
+            </author>
+        </authorgroup>
+        <copyright>
+            <year>2009</year>
+            <holder><xref linkend="org1"/>, <xref linkend="org2"/>, <xref linkend="org3"/>, <xref
+                    linkend="org1"/>,<xref linkend="org4"/>, All rights reserved.</holder>
+        </copyright>
+        <releaseinfo>Version ${project.version}</releaseinfo>
+    </info>
+    <preface>
+        <title>Foreword</title>
+        <para>The intention of this document is first to give a guide to the user of how to use the
+            here mentioned pepper modules and how to utilize a mapping performed by them. Second
+            this document shall give a closer view in the details of such a mapping in a declarative
+            way, to give the user a chance to understand how specific data will be mapped by the
+            presented pepper modules.</para>
+    </preface>
+    <chapter>
+        <title>Overview</title>
+        <para>This project contains the pepper modules listed in <xref linkend="table_overview"/>. A
+            single module can be identified via its coordinates (module-name, format-name,
+            format-version) also given in <xref linkend="table_overview"/>. You can use these
+            coordinates in a pepper workflow description file to identify the modules in a pepper
+            conversion process. A description of how to model a workfloe description file can be
+            found under https://korpling.german.hu-berlin.de/saltnpepper/.</para>
+        <para>rst XML is the Potsdamer Austauschformat für linguistische Annotation ("Potsdam
+            Interchange Format for Linguistic Annotation"), see <link
+                xlink:href="http://www.sfb632.uni-potsdam.de/d1/rst/doc/"
+                >http://www.sfb632.uni-potsdam.de/d1/rst/doc/</link>. rst XML has been developed in
+            Project D1: Linguistic Database: Annotation and Retrieval of the SFB 632. It is an
+            XML-based standoff representation format, which has been designed to represent data with
+            heterogeneous annotation layers produced by different tools.</para>
+        <table xml:id="table_overview" frame="all">
+            <title>pepper modules contained in this project</title>
+            <tgroup cols="3" align="left" colsep="1" rowsep="1">
+                <thead>
+                    <row>
+                        <entry>Name of pepper module</entry>
+                        <entry>Type of pepper module</entry>
+                        <entry>Format (if module is im- or exporter)</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry><xref linkend="rst_importer" endterm="rst_importer_name"/></entry>
+                        <entry>importer</entry>
+                        <entry>1.0</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </table>
+    </chapter>
+    <chapter xml:id="changes">
+        <title>Changes</title>
+        <para>No description exists so far</para>
+    </chapter>
+    <chapter>
+        <title>Mapping between rst and Salt</title>
+        <para>The rst format is very similar to the Salt metamodel, therefore the mapping between
+            them often is very straight forward.</para>
+        <sect1>
+            <title>rst version 1.0</title>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>Folder structure in rst SCorpus and SDocument in Salt</para>
+                    </listitem>
+                    <listitem>
+                        <para>MetaData in rst SMetaANNottation on SDocument or SCorpus in
+                            Salt</para>
+                    </listitem>
+                    <listitem>
+                        <para>&lt;struct> to SSTructure</para>
+                    </listitem>
+                    <listitem>
+                        <para>&lt;rel> inside &lt;struct>to SDocminanceRelation</para>
+                    </listitem>
+                    <listitem>
+                        <para>&lt;rel> to SPointingRelation</para>
+                    </listitem>
+                    <listitem>
+                        <para>content of &lt;body> to STextualDS.sText</para>
+                    </listitem>
+                    <listitem>
+                        <para>&lt;mark> with type tok to SToken</para>
+                    </listitem>
+                    <listitem>
+                        <para>&lt;mark> to SSpan and artificial SSpanningRelation</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </sect1>
+    </chapter>
+    <chapter xml:id="rst_importer">
+        <title xml:id="rst_importer_name">rstImporter</title>
+        <para>General information about this importer.</para>
+        <sect1>
+            <title>Mapping to Salt</title>
+            <itemizedlist>
+                <listitem>
+                    <para>tokenizer can be used (customized via abbreviation)</para>
+                </listitem>
+                <listitem>
+                    <para>rst api see ??? is used</para>
+                </listitem>
+                <listitem>
+                    <para>STextualDS.sText via Segment content, text created in order of segments
+                        (show example)</para>
+                </listitem>
+                <listitem>
+                    <para>a segment itself is mapped to sstructure, if tokenize is yes, tokens are
+                        created and sstructure dominates token(show example), if not, each segmentg
+                        is a token and sstructure (show example)</para>
+                </listitem>
+                <listitem>
+                    <para>group is mapped to sstructure</para>
+                </listitem>
+                <listitem>
+                    <para>the kind of node (group| segment) is mapped to an sannotation having the
+                        sname 'kind'</para>
+                </listitem>
+                <listitem>
+                    <para>the type of a node in rs3 //group@type or //segment@type is mapped to an
+                        sannotation having the sname 'type'</para>
+                </listitem>
+                <listitem>
+                    <para>relation is mapped to sdominancerelation, having parent as source and
+                        child as target (sample)</para>
+                </listitem>
+                <listitem>
+                    <para>name of relation is mapped to SAnnotation with sname 'name',
+                        relation.sname='name'+ occurance</para>
+                </listitem>
+                <listitem>
+                    <para>sType of relation is the type attribute from relation, in rs3 stored in
+                        //relations/rel@type</para>
+                </listitem>
+            </itemizedlist>
+            <para>
+                Each relation of type (type or name attribute) span will be mapped to a SDominanceRelation in Salt. For each non-span relation in the path to a leaf of a node having a span relation, an additional SDominanceRelation will be created. For example imagine the following:
+                
+                a -->[span] b
+                b-->[non-span] c
+                
+                In this case an additional dominance relation between a and c will be created. This is done, to create a tree-like structure in the sense of a full syntactic tree.
+                
+                The behavior of the RSTImporter can be adjusted by setting some parameters inside a property file. This property file can be included in the pepper workflow description file as described in the QuickUserGuide of the Pepper documentation. The using of a parameter file is optional for this module.
+                Here we show a property file, containing all possible parameters which can be used to adjust the RSTImporters behavior. A short description of each parameter is given with the comments. A closer explanation is given beyond.
+            </para>
+        </sect1>
+        <sect1>
+            <title>Properties</title>
+            <para> The table <xref linkend="importer_prop_overview"/> contains an overview of all
+                usable properties to customize the behaviour of this pepper module. The following
+                section contains a close description to each single property and describes the
+                resulting differences in the mapping to the salt model.</para>
+            <table xml:id="importer_prop_overview" frame="all">
+                <title>properties to customize importer behaviour</title>
+                <tgroup cols="4" align="left" colsep="1" rowsep="1">
+                    <thead>
+                        <row>
+                            <entry>Name of property</entry>
+                            <entry>Type of property</entry>
+                            <entry>optional/ mandatory</entry>
+                            <entry>default value</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry><xref linkend="prop_prop1" endterm="importer_prop1_title"
+                                /></entry>
+                            <entry>yes|no</entry>
+                            <entry>optional</entry>
+                            <entry>--</entry>
+                        </row>
+                        <row>
+                            <entry><xref linkend="prop_prop2" endterm="importer_prop2_title"
+                            /></entry>
+                            <entry>URI</entry>
+                            <entry>optional</entry>
+                            <entry>--</entry>
+                        </row>
+                        <row>
+                            <entry><xref linkend="prop_prop3" endterm="importer_prop3_title"
+                            /></entry>
+                            <entry>iso-639</entry>
+                            <entry>optional</entry>
+                            <entry>--</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <sect2 xml:id="prop_prop1">
+                <title xml:id="importer_prop1_title">rstImporter.tokenize</title>
+                <para>This parameter is an optional parameter and can be set to “yes” or “no”. If it is set to “yes”, the text being included in a segment will be tokenized. The tokens will be mapped to SToken-objects in Salt and attached to the SDocumentGraph-object. Further, an STextualRelation between a token and the text will be created and a dominance relation between the token and the segment. 
+                    The default configuration of this parameter is true, if non tokenization is required, this parameter must explicitly set to false.</para>
+            </sect2>
+            <sect2 xml:id="prop_prop2">
+                <title xml:id="importer_prop2_title">rstImporter.abbreviationFolder</title>
+                <para>This parameter is an optional parameter and can be set to a folder containing user-defined abbreviations for the tokenizer mechanism. If the parameter “rstImporter.tokenize“ is not set to “yes”, this parameter will be ignored.</para>
+            </sect2>
+            <sect2 xml:id="prop_prop3">
+                <title xml:id="importer_prop3_title">rstImporter.language</title>
+                <para>This parameter is optional and determines the language to be used for tokenizing of primary text. If no language is given, it will be detected automatically.</para>
+            </sect2>
+        </sect1>
+    </chapter>
+</book>

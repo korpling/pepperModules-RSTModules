@@ -17,32 +17,30 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
-import java.io.File;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.log.LogService;
 
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Group;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.RSTDocument;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Relation;
-import de.hu_berlin.german.korpling.saltnpepper.misc.rst.Segment;
+import de.hu_berlin.german.korpling.rst.Group;
+import de.hu_berlin.german.korpling.rst.RSTDocument;
+import de.hu_berlin.german.korpling.rst.Relation;
+import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
 import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.Token;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.exceptions.RSTImporterException;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SRelation;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -99,22 +97,21 @@ public class RST2SaltMapper
 	/**
 	 * properties for the mapping.
 	 */
-	private Properties props= null;
+	private RSTImporterProperties props= null;
 	/**
 	 * Sets properties for the mapping.
 	 * @param props the props to set
 	 */
-	public void setProps(Properties props) 
+	public void setProps(RSTImporterProperties props) 
 	{
 		this.props = props;
-		this.delegateProperties(props);
 	}
 
 	/**
 	 * Returns the set properties for the mapping.
 	 * @return the props
 	 */
-	public Properties getProps() {
+	public RSTImporterProperties getProps() {
 		return props;
 	}
 	
@@ -173,65 +170,24 @@ public class RST2SaltMapper
 		return this.currentRSTDocument;
 	}
 // ================================================ end: current SDocument
-// ================================================ start: tokenizing
-	/**
-	 * Stores if a tokenization has to be done.
-	 */
-	private Boolean isToTokenize= true;
-	/**
-	 * Sets if a tokenization has to be done.
-	 * @param isToTokenize the isToTokenize to set
-	 */
-	public void isToTokenize(Boolean isToTokenize) {
-		this.isToTokenize = isToTokenize;
-	}
-
-	/**
-	 * Returns if a tokenization has to be done.
-	 * @return the isToTokenize
-	 */
-	public Boolean isToTokenize() {
-		return isToTokenize;
-	}
 	
-// ================================================ end: tokenizing
-	/**
-	 * Reads the properties given with props and sets all contained values.
-	 */
-	private void delegateProperties(Properties props)
+	private void setParams()
 	{
-		if (props!= null)
+		if (this.getProps()== null)
 		{
-			{//tokenization
-				String tokenize= null;
-				tokenize= props.getProperty(RSTImporter.PROP_RST_IMPORTER_TOKENIZE); 
-				if (tokenize!= null)
-				{
-					if ("yes".equalsIgnoreCase(tokenize))
-						this.isToTokenize(true);
-					else if ("no".equalsIgnoreCase(tokenize))
-					{
-						this.isToTokenize(false);
-					}
-				}
-			}//tokenization
-			{//user-defined abbreviation folder
-				String abbFolder= null;
-				abbFolder= props.getProperty(RSTImporter.PROP_RST_IMPORTER_ABBFOLDER); 
-				if (abbFolder!= null)
-				{//abbreviation folder is set
-					this.tokenizer.setAbbreviationFolder(new File(abbFolder));
-				}//abbreviation folder is set
-			}//user-defined abbreviation folder
-			{//language
-				String lang= null;
-				lang= props.getProperty(RSTImporter.PROP_RST_IMPORTER_LANGUAGE);
-				if (lang!= null)
-				{//abbreviation folder is set
-					if (TT_LANGUAGES.valueOf(lang)!= null)
-						this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(lang));
-				}//abbreviation folder is set
-			}//language
+			throw new RSTImporterException("No Property object is given, this seems to be an internal bug.");
+		}
+		else
+		{
+			if (this.getProps().getAbbreviationFolder()!= null)
+			{//abbreviation folder is set
+				this.tokenizer.setAbbreviationFolder(this.getProps().getAbbreviationFolder());
+			}//abbreviation folder is set
+			if (this.getProps().getLanguage()!= null)
+			{//abbreviation folder is set
+				if (TT_LANGUAGES.valueOf(this.getProps().getLanguage())!= null)
+					this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(this.getProps().getLanguage()));
+			}//abbreviation folder is set
 		}
 	}
 	
@@ -244,28 +200,28 @@ public class RST2SaltMapper
 	 */
 	public void mapRSTDocument2SDocument()
 	{
-		this.delegateProperties(props);
+		setParams();
 		this.getCurrentSDocument().setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
 			
-		{//map segments to STextualDS, Tokens and SStructures
+		//map segments to STextualDS, Tokens and SStructures
 			if (this.getCurrentRSTDocument().getSegments().size()> 0)
 			{	
-				if (this.isToTokenize)
+				if (this.getProps().isToTokenize())
 					this.mapSegmentsWithTokenize(this.getCurrentRSTDocument().getSegments());
 				else
 					this.mapSegmentsWithoutTokenize(this.getCurrentRSTDocument().getSegments());
 			}
-		}//map segments to STextualDS, Tokens and SStructures
-		{//map group to SStructure
+		//map segments to STextualDS, Tokens and SStructures
+		//map group to SStructure
 			for (Group group: this.getCurrentRSTDocument().getGroups())
 				this.mapGroup2SStructure(group);
-		}//map group to SStructure
-		{//maps all relations and creates artificial ones if neccessary
+		//map group to SStructure
+		//maps all relations and creates artificial ones if neccessary
 			for (Relation relation: this.getCurrentRSTDocument().getRelations())
 			{
 				this.mapRelation(relation);
 			}
-		}//maps all relations and creates artificial ones if neccessary
+		//maps all relations and creates artificial ones if neccessary
 	}
 	
 	/**
@@ -280,16 +236,24 @@ public class RST2SaltMapper
 	public TTTokenizer getTokenizer() {
 		return tokenizer;
 	}
-
 	/**
-	 * Maps the given segment to the current STextualDS by adding all textual values of segment behind
-	 * the preceding. The created STextualDS will be added to the SDocumentGraph. Also SToken objects will be 
-	 * created by tokeizing the textand related to the STextualDS. As last a SSTructure object for the segment
-	 * will be created and related to the tokens.
-	 * @param segments 
+	 * Name of node kind segment.
+	 */
+	public static final String NODE_KIND_SEGMENT="segment";
+	/**
+	 * Name of node kind group. 
+	 */
+	public static final String NODE_KIND_GROUP="group";
+	
+	/**
+	 * Maps the given {@link Segment} to the current {@link STextualDS} by adding all textual values of segment after
+	 * the preceding one. The created {@link STextualDS} will be added to the {@link SDocumentGraph}. Also {@link SToken} objects 
+	 * created by a tokenizer will be added and connected to the {@link STextualDS} object. As last a {@link SStructure} object 
+	 * for the {@link Segment} object will be created and related to the {@link SToken} objects.
+	 * @param segments a list of {@link Segment} objects
 	 * @return
 	 */
-	private void mapSegmentsWithTokenize(EList<Segment> segments)
+	public void mapSegmentsWithTokenize(EList<Segment> segments)
 	{
 		STextualDS sText= null;
 		if (	(segments!= null)&&
@@ -307,23 +271,19 @@ public class RST2SaltMapper
 				}
 				catch (Exception e) 
 				{
-					e.printStackTrace();
 					throw new RSTImporterException("Cannot tokenize the following sentence: "+segment.getText(), e);
 				}				
 				if (	(tokens!= null)&&
 						(tokens.size()> 0))
 				{//if tokens exist	
 					SStructure sStruct= SaltFactory.eINSTANCE.createSStructure();
-					{//create SAnnotation containing the group as value
-						SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-						sAnno.setSName("cat");
-						sAnno.setSValue("segment");
-						sStruct.addSAnnotation(sAnno);
-					}//create SAnnotation containing the group as value
+					sStruct.setSName(segment.getId());
+					sStruct.createSAnnotation(null, this.getProps().getNodeKindName(), NODE_KIND_SEGMENT);
+					if (segment.getType()!= null)
+						sStruct.createSAnnotation(null, this.getProps().getNodeTypeName(), segment.getType());
 					
 					//puts segment.id and mapped SStructure-object into table
 					this.rstId2SStructure.put(segment.getId(), sStruct);
-					sStruct.setSName("segment_"+segment.getId());
 					this.getCurrentSDocument().getSDocumentGraph().addSNode(sStruct);
 					
 					for (Token token: tokens)
@@ -371,16 +331,12 @@ public class RST2SaltMapper
 			for (Segment segment: segments)
 			{//for all segments adding their text, creating tokens, and relations	
 				SStructure sStruct= SaltFactory.eINSTANCE.createSStructure();
-				{//create SAnnotation containing the group as value
-					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-					sAnno.setSName("cat");
-					sAnno.setSValue("group");
-					sStruct.addSAnnotation(sAnno);
-				}//create SAnnotation containing the group as value
-				
+				sStruct.createSAnnotation(null, this.getProps().getNodeKindName(), NODE_KIND_SEGMENT);
+				if (segment.getType()!= null)
+					sStruct.createSAnnotation(null, this.getProps().getNodeTypeName(), segment.getType());
+				sStruct.setSName(segment.getId());
 				//puts segment.id and mapped SStructure-object into table
 				this.rstId2SStructure.put(segment.getId(), sStruct);
-				sStruct.setSName("segment_"+segment.getId());
 				this.getCurrentSDocument().getSDocumentGraph().addSNode(sStruct);
 				
 				SToken sToken= SaltFactory.eINSTANCE.createSToken();
@@ -414,14 +370,17 @@ public class RST2SaltMapper
 		if (group!= null)
 		{
 			sStructure= SaltFactory.eINSTANCE.createSStructure();
+			sStructure.setSName(group.getId());
+			if (group.getType()!= null)
+				sStructure.createSAnnotation(null, this.getProps().getNodeTypeName(), group.getType());
 			
 			//puts segment.id and mapped SSTructure-object into table
 			this.rstId2SStructure.put(group.getId(), sStructure);
-			sStructure.setSName("group_"+group.getId());
+			
 			{//create SAnnotation containing the group as value
 				SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-				sAnno.setSName("cat");
-				sAnno.setSValue("group");
+				sAnno.setSName(this.getProps().getNodeKindName());
+				sAnno.setSValue(NODE_KIND_GROUP);
 				sStructure.addSAnnotation(sAnno);
 			}//create SAnnotation containing the group as value
 			this.getCurrentSDocument().getSDocumentGraph().addSNode(sStructure);
@@ -443,111 +402,74 @@ public class RST2SaltMapper
 				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
 			
 			SStructure sSource= this.rstId2SStructure.get(relation.getParent().getId());
-			SStructure sTarget= this.rstId2SStructure.get(relation.getSource().getId());
+			SStructure sTarget= this.rstId2SStructure.get(relation.getChild().getId());
 			if (sSource== null)
-				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation points to a non existing node with id '"+relation.getParent().getId()+"'.");
+				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation points to a non existing node with id '"+relation.getChild().getId()+"'.");
 			if (sTarget== null)
-				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getSource().getId()+"'.");
+				throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getParent().getId()+"'.");
 			
-			if (	(	(relation.getType()!= null)&&
-						("span".equalsIgnoreCase(relation.getType())))||
-					(	(relation.getName()!= null)&&
-						("span".equalsIgnoreCase(relation.getName())))	)
-			{//either name or type is "span"
-				SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-				//TODO delete the comment and delete the creation of dominance relation
+			SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
+			if (relation.getType()!= null)
 				sDomRel.addSType(relation.getType());
-				sDomRel.setSSource(sSource);
-				sDomRel.setSTarget(sTarget);
-				this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
-				
-				if (relation.getName()!= null)
-				{//add annotation to relation
-					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-					//TODO delete the comment and delete the creation of dominance relation
-					sAnno.setSName("name");
-					sAnno.setSValue(relation.getName());
-					sDomRel.addSAnnotation(sAnno);
-				}//add annotation to relation
-				
-				this.createTransitiveRelations(relation, sSource);
-			}//either name or type is "span"
-			else
-			{//map relation to pointing relation
-				SRelation sRel= null;
-				//TODO delete the comment and delete the creation of dominance relation
-//				sRel= SaltFactory.eINSTANCE.createSPointingRelation();
-				sRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-				sRel.addSType(relation.getType());
-//				{//interim solution
-//					sRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-//					sRel.addSType("secedge");
-//				}//interim solution
-				
-				sRel.setSSource(sSource);
-				sRel.setSTarget(sTarget);
-				this.getCurrentSDocument().getSDocumentGraph().addSRelation(sRel);
-
-				if (relation.getName()!= null)
-				{//add annotation to relation
-					SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-					sAnno.setSName("type");
-					sAnno.setSValue(relation.getName());
-					sRel.addSAnnotation(sAnno);
-				}//add annotation to relation
-			}//map relation to pointing relation
+			sDomRel.setSSource(sSource);
+			sDomRel.setSTarget(sTarget);
+			this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
+			
+			if (relation.getName()!= null)
+				sDomRel.createSAnnotation(null, this.getProps().getRelationName(), relation.getName());
+			
+			
+//			if (	(	(relation.getType()!= null)&&
+//						("span".equalsIgnoreCase(relation.getType())))||
+//					(	(relation.getName()!= null)&&
+//						("span".equalsIgnoreCase(relation.getName())))	)
+//			{//either name or type is "span"
+//				this.createTransitiveRelations(relation, sSource);
+//			}//either name or type is "span"
 		}
 	}
 	
-	/**
-	 * Traverses the rstGraph and creates artificial relations for all non-span relations found in
-	 * subgraph with root parentNode.
-	 * @param relation
-	 * @param parentNode
-	 * @param childNode
-	 */
-	private void createTransitiveRelations(Relation relation, SStructure parentNode)
-	{
-		EList<Relation> incomingRelations= this.getCurrentRSTDocument().getIncomingRelations(relation.getSource().getId());
-		if (incomingRelations!= null)
-		{
-			for (Relation incomingRelation: incomingRelations)
-			{
-				if (	(	(incomingRelation.getType()== null)||
-							(!incomingRelation.getType().equalsIgnoreCase("span")))&&
-						(	(incomingRelation.getName()== null)||
-							(!incomingRelation.getName().equalsIgnoreCase("span")))	)
-				{//neither name nor type is "span"
-					if (relation.getParent()== null)
-						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation is empty.");
-					if (relation.getParent()== null)
-						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
-					
-					SStructure sTarget= this.rstId2SStructure.get(incomingRelation.getSource().getId());
-					if (sTarget== null)
-						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getSource().getId()+"'.");
-
-					SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-					//TODO delete the comment and delete the creation of dominance relation
-					sDomRel.addSType(relation.getType());
-//					{//interim solution
-//						sDomRel.addSType("edge");
-//					}//interim solution
-					sDomRel.setSSource(parentNode);
-					sDomRel.setSTarget(sTarget);
-					this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
-					
-					if (incomingRelation.getName()!= null)
-					{//add annotation to relation
-						SAnnotation sAnno= SaltFactory.eINSTANCE.createSAnnotation();
-						sAnno.setSName("type");
-						sAnno.setSValue(relation.getName());
-						sDomRel.addSAnnotation(sAnno);
-					}//add annotation to relation
-					
-					this.createTransitiveRelations(incomingRelation, parentNode);
-				}//neither name nor type is "span"
-			}
-		}
-	}
+//	/**
+//	 * Traverses the rstGraph and creates artificial relations for all non-span relations found in
+//	 * subgraph with root parentNode.
+//	 * @param relation
+//	 * @param parentNode
+//	 * @param childNode
+//	 */
+//	private void createTransitiveRelations(Relation relation, SStructure parentNode)
+//	{
+//		EList<Relation> incomingRelations= this.getCurrentRSTDocument().getIncomingRelations(relation.getChild().getId());
+//		if (incomingRelations!= null)
+//		{
+//			for (Relation incomingRelation: incomingRelations)
+//			{
+//				if (	(	(incomingRelation.getType()== null)||
+//							(!incomingRelation.getType().equalsIgnoreCase("span")))&&
+//						(	(incomingRelation.getName()== null)||
+//							(!incomingRelation.getName().equalsIgnoreCase("span")))	)
+//				{//neither name nor type is "span"
+//					if (relation.getParent()== null)
+//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation is empty.");
+//					if (relation.getParent()== null)
+//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
+//					
+//					SStructure sTarget= this.rstId2SStructure.get(incomingRelation.getChild().getId());
+//					if (sTarget== null)
+//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getChild().getId()+"'.");
+//
+//					SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
+//					//TODO delete the comment and delete the creation of dominance relation
+//					sDomRel.addSType(relation.getType());
+//					sDomRel.setSSource(parentNode);
+//					sDomRel.setSTarget(sTarget);
+//					this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
+//					
+//					if (incomingRelation.getName()!= null)
+//						sDomRel.createSAnnotation(null, this.getProps().getRelationName(), relation.getName());
+//					
+//					this.createTransitiveRelations(incomingRelation, parentNode);
+//				}//neither name nor type is "span"
+//			}
+//		}
+//	}
 }
