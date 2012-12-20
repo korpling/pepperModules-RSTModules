@@ -193,9 +193,6 @@ public class RST2SaltMapperTest extends TestCase{
 		this.getFixture().mapRSTDocument2SDocument();
 		SDocumentGraph sDocGraph=  this.getFixture().getCurrentSDocument().getSDocumentGraph();
 		
-		Salt2DOT s2d= new Salt2DOT();
-		s2d.salt2Dot(sDocGraph, URI.createFileURI("d:/Test/RST/Benjamin/rst/RSTManMini/dot/b1.dot"));
-		
 		//STextualDS
 		assertNotNull(sDocGraph.getSTextualDSs());
 		assertEquals(1,sDocGraph.getSTextualDSs().size());
