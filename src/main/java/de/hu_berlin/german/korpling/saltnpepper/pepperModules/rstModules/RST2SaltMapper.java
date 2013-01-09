@@ -416,60 +416,7 @@ public class RST2SaltMapper
 			this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
 			
 			if (relation.getName()!= null)
-				sDomRel.createSAnnotation(null, this.getProps().getRelationName(), relation.getName());
-			
-			
-//			if (	(	(relation.getType()!= null)&&
-//						("span".equalsIgnoreCase(relation.getType())))||
-//					(	(relation.getName()!= null)&&
-//						("span".equalsIgnoreCase(relation.getName())))	)
-//			{//either name or type is "span"
-//				this.createTransitiveRelations(relation, sSource);
-//			}//either name or type is "span"
+				sDomRel.createSAnnotation(null, this.getProps().getRelationName(), relation.getName());			
 		}
 	}
-	
-//	/**
-//	 * Traverses the rstGraph and creates artificial relations for all non-span relations found in
-//	 * subgraph with root parentNode.
-//	 * @param relation
-//	 * @param parentNode
-//	 * @param childNode
-//	 */
-//	private void createTransitiveRelations(Relation relation, SStructure parentNode)
-//	{
-//		EList<Relation> incomingRelations= this.getCurrentRSTDocument().getIncomingRelations(relation.getChild().getId());
-//		if (incomingRelations!= null)
-//		{
-//			for (Relation incomingRelation: incomingRelations)
-//			{
-//				if (	(	(incomingRelation.getType()== null)||
-//							(!incomingRelation.getType().equalsIgnoreCase("span")))&&
-//						(	(incomingRelation.getName()== null)||
-//							(!incomingRelation.getName().equalsIgnoreCase("span")))	)
-//				{//neither name nor type is "span"
-//					if (relation.getParent()== null)
-//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation is empty.");
-//					if (relation.getParent()== null)
-//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the source of a relation is empty.");
-//					
-//					SStructure sTarget= this.rstId2SStructure.get(incomingRelation.getChild().getId());
-//					if (sTarget== null)
-//						throw new RSTImporterException("Cannot map the rst-model of file'"+this.getCurrentRSTDocumentURI()+"', because the parent of a relation belongs to a non existing node with id '"+relation.getChild().getId()+"'.");
-//
-//					SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
-//					//TODO delete the comment and delete the creation of dominance relation
-//					sDomRel.addSType(relation.getType());
-//					sDomRel.setSSource(parentNode);
-//					sDomRel.setSTarget(sTarget);
-//					this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
-//					
-//					if (incomingRelation.getName()!= null)
-//						sDomRel.createSAnnotation(null, this.getProps().getRelationName(), relation.getName());
-//					
-//					this.createTransitiveRelations(incomingRelation, parentNode);
-//				}//neither name nor type is "span"
-//			}
-//		}
-//	}
 }
