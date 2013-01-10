@@ -5,7 +5,7 @@
   <version>0.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <description>This project provides a Pepper importer and exporter for RST data.</description>
+  <description>The project RSTModules provides an importer for Pepper to import data coming from rs3 format to salt. The mapper is based on the rst-api (see: https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki).</description>
   <url>https://korpling.german.hu-berlin.de/p/projects/peppermodules-rstmodules</url>
   <issueManagement>
   	<system>Redmine</system>
