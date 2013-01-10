@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0" xmlns:xl="http://www.w3.org/1999/xlink">
     <info>
         <title>RSTModules</title>
         <subtitle>User's Guide</subtitle>
@@ -56,13 +56,12 @@
             coordinates in a pepper workflow description file to identify the modules in a pepper
             conversion process. A description of how to model a workfloe description file can be
             found under https://korpling.german.hu-berlin.de/saltnpepper/.</para>
-        <para>rst XML is the Potsdamer Austauschformat für linguistische Annotation ("Potsdam
-            Interchange Format for Linguistic Annotation"), see <link
-                xlink:href="http://www.sfb632.uni-potsdam.de/d1/rst/doc/"
-                >http://www.sfb632.uni-potsdam.de/d1/rst/doc/</link>. rst XML has been developed in
-            Project D1: Linguistic Database: Annotation and Retrieval of the SFB 632. It is an
-            XML-based standoff representation format, which has been designed to represent data with
-            heterogeneous annotation layers produced by different tools.</para>
+        <para>RST stands for  Rhetorical Structure Theory and descibes a linguistical analysis. Next
+            to to the rethorical structure theory, a tool named RST Tool was developed see:
+            <link xl:href="http://www.wagsoft.com/RSTTool/">http://www.wagsoft.com/RSTTool/</link>. 
+            This tool produces rs3 files, which
+            are imported by the here provided RSTImporter. The RSTImporter makes use of the rst-api
+            (see: <link xl:href="https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki">https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki</link>). </para>
         <table xml:id="table_overview" frame="all">
             <title>pepper modules contained in this project</title>
             <tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -83,103 +82,87 @@
             </tgroup>
         </table>
     </chapter>
+    <!-- 
     <chapter xml:id="changes">
         <title>Changes</title>
-        <para>No description exists so far</para>
+        <para>No changes so far.</para>
     </chapter>
-    <chapter>
-        <title>Mapping between rst and Salt</title>
-        <para>The rst format is very similar to the Salt metamodel, therefore the mapping between
-            them often is very straight forward.</para>
-        <sect1>
-            <title>rst version 1.0</title>
-            <para>
-                <itemizedlist>
-                    <listitem>
-                        <para>Folder structure in rst SCorpus and SDocument in Salt</para>
-                    </listitem>
-                    <listitem>
-                        <para>MetaData in rst SMetaANNottation on SDocument or SCorpus in
-                            Salt</para>
-                    </listitem>
-                    <listitem>
-                        <para>&lt;struct> to SSTructure</para>
-                    </listitem>
-                    <listitem>
-                        <para>&lt;rel> inside &lt;struct>to SDocminanceRelation</para>
-                    </listitem>
-                    <listitem>
-                        <para>&lt;rel> to SPointingRelation</para>
-                    </listitem>
-                    <listitem>
-                        <para>content of &lt;body> to STextualDS.sText</para>
-                    </listitem>
-                    <listitem>
-                        <para>&lt;mark> with type tok to SToken</para>
-                    </listitem>
-                    <listitem>
-                        <para>&lt;mark> to SSpan and artificial SSpanningRelation</para>
-                    </listitem>
-                </itemizedlist>
-            </para>
-        </sect1>
-    </chapter>
+    -->
     <chapter xml:id="rst_importer">
         <title xml:id="rst_importer_name">rstImporter</title>
-        <para>General information about this importer.</para>
+        <para>Rst is a theory on phrase-like constructs, which mean, that a token in rst is a
+            phrase. When mapping these data to Salt, an SToken object represents such a phrase.
+            Since in most cases this is not the wanted behaviour, the RSTImporter provides a
+            mechanism to tokenize the phrases into word-like structures. Therefore it takes use of
+            the tokenizer provided by Salt which copies the way of tokenization from the TreeTagger
+            (see: <link xl:href="www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger/"
+                >www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger/</link> ). </para>
+        <para>Rst in general forms a tree-like structure, which is mapped as this to a Salt model.
+            For more information on the Rst model which is used, please take a look to the rst-api,
+            where the RSTImporter is based on (see: <link xl:href="https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki">https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki</link>).</para>
         <sect1>
             <title>Mapping to Salt</title>
-            <itemizedlist>
-                <listitem>
-                    <para>tokenizer can be used (customized via abbreviation)</para>
-                </listitem>
-                <listitem>
-                    <para>rst api see ??? is used</para>
-                </listitem>
-                <listitem>
-                    <para>STextualDS.sText via Segment content, text created in order of segments
-                        (show example)</para>
-                </listitem>
-                <listitem>
-                    <para>a segment itself is mapped to sstructure, if tokenize is yes, tokens are
-                        created and sstructure dominates token(show example), if not, each segmentg
-                        is a token and sstructure (show example)</para>
-                </listitem>
-                <listitem>
-                    <para>group is mapped to sstructure</para>
-                </listitem>
-                <listitem>
-                    <para>the kind of node (group| segment) is mapped to an sannotation having the
-                        sname 'kind'</para>
-                </listitem>
-                <listitem>
-                    <para>the type of a node in rs3 //group@type or //segment@type is mapped to an
-                        sannotation having the sname 'type'</para>
-                </listitem>
-                <listitem>
-                    <para>relation is mapped to sdominancerelation, having parent as source and
-                        child as target (sample)</para>
-                </listitem>
-                <listitem>
-                    <para>name of relation is mapped to SAnnotation with sname 'name',
-                        relation.sname='name'+ occurance</para>
-                </listitem>
-                <listitem>
-                    <para>sType of relation is the type attribute from relation, in rs3 stored in
-                        //relations/rel@type</para>
-                </listitem>
-            </itemizedlist>
-            <para>
-                Each relation of type (type or name attribute) span will be mapped to a SDominanceRelation in Salt. For each non-span relation in the path to a leaf of a node having a span relation, an additional SDominanceRelation will be created. For example imagine the following:
-                
-                a -->[span] b
-                b-->[non-span] c
-                
-                In this case an additional dominance relation between a and c will be created. This is done, to create a tree-like structure in the sense of a full syntactic tree.
-                
-                The behavior of the RSTImporter can be adjusted by setting some parameters inside a property file. This property file can be included in the pepper workflow description file as described in the QuickUserGuide of the Pepper documentation. The using of a parameter file is optional for this module.
-                Here we show a property file, containing all possible parameters which can be used to adjust the RSTImporters behavior. A short description of each parameter is given with the comments. A closer explanation is given beyond.
-            </para>
+            <para>In rst, the primary data is represented by the textual values contained by
+                    <classname>Segment</classname> objects. The text of all
+                    <classname>Segment</classname> objects is mapped the sText value of  exactly one
+                    <classname>STextualDS</classname> object. The text of a
+                    <classname>Segment</classname> object is concatenated to the sText prefixed by
+                the blank seperator ' '. Imagine a text of segment1 'Is this example' and the text
+                of segment2 'more complicated than it is supposed to be', than the sText value is
+                'Is this example more complicated than it is supposed to be'. The separator can be
+                user defined or set to '' (empty) by taking use of the property <xref linkend="prop_prop5" endterm="importer_prop5_title"
+                />.</para>
+            <para>A <classname>Segment</classname> object itself is mapped to
+                    <classname>sStructure</classname>. As already mentioned, the RSTImporter
+                provides the mechanism to tokenize a text in word-like tokens. Therefore, the text
+                covered by a <classname>Segment</classname> object is tokenized to
+                    <classname>SToken</classname> objects. These <classname>SToken</classname>
+                objects than are be related to <classname>SStructure</classname> object representing
+                the <classname>Segment</classname> object via a
+                    <classname>SDominanceRelation</classname>. In case of a
+                    <classname>Segment</classname> object covers the text 'Is this example', the
+                tokenizer will create <classname>SToken</classname> objects covering the text 'Is',
+                'this' and 'example'. The three tokens are dominated by one
+                    <classname>SStructure</classname> object. To avoid the tokenization, take use of
+                the property <xref linkend="prop_prop1" endterm="importer_prop1_title"
+                />.</para>
+            <para>Each <classname>Group</classname> object is also mapped to a
+                    <classname>SStructure</classname> object. The tree-like structure given by
+                    <classname>Group</classname> objects and <classname>Relation</classname> objects
+                related to <classname>Group</classname> or <classname>Segment</classname> objects is
+                mapped to <classname>SStructure</classname> objects related via
+                    <classname>SDominanceRelation</classname> objects. Imagine a
+                    <classname>Group</classname> object 'grp1', containing another
+                    <classname>Group</classname> object 'grp2' and a <classname>Segment</classname>
+                object 'seg1'. This will be mapped into a Salt model having three
+                    <classname>SStructure</classname> objects 'struct1' for 'grp1', 'struct2' for
+                'grp2' and 'struct3' for 'seg1'. Further, two
+                    <classname>SDominanceRelation</classname> objects 'dom1' and 'dom2' are created
+                with 'struct1 -dom1-> struct2' and 'struct1 -dom2-> struct3'.</para>
+            <para>Since all <classname>Group</classname> and <classname>Segment</classname> objects
+                are mapped to <classname>SStructure</classname> objects, we won't loose the
+                information, what has been the source. Therefore, for the kind of the node 'group'
+                or 'segment' a <classname>SAnnotation</classname> object is created and related to
+                the <classname>SStructure</classname> object. The sName of this
+                    <classname>SAnnotation</classname> object is set to 'kind'. To change the sName,
+                take use of the property <xref linkend="prop_prop2" endterm="importer_prop2_title"
+                />.</para>
+            <para>Also for the type attribute of a <classname>Group</classname> or
+                    <classname>Segment</classname> object  an <classname>SAnnotation</classname>
+                object is created. Its sName is set to 'type'. To adopt the sName, take use of the
+                property <xref linkend="prop_prop3" endterm="importer_prop3_title"
+                /></para>
+            <para>The name of a <classname>Relation</classname> object is mapped to a
+                    <classname>SAnnotation</classname> object having the  sName 'name'. To avoid,
+                that a bunch of <classname>Relation</classname> object get the same name, an
+                artificial number is concatenated to the name
+                    (<classname>SDominanceRelation.sName</classname>='name'+ occurance). For
+                instance there are two <classname>Relation</classname> objects haveing the name
+                'rel', than the first will get the sName 'rel1' and the second will get the sName
+                'rel2'.</para>
+            <para>The type of a <classname>Relation</classname> object ( //relations/rel@type in
+                rs3) is mapped to the <classname>sType</classname> of a created
+                    <classname>SDominanceRelation</classname> object. </para>
         </sect1>
         <sect1>
             <title>Properties</title>
