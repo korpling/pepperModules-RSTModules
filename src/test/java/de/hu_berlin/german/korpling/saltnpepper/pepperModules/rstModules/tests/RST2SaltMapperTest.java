@@ -105,7 +105,7 @@ public class RST2SaltMapperTest extends TestCase{
 		assertNotNull(sDocGraph.getSTextualDSs());
 		assertEquals(1,sDocGraph.getSTextualDSs().size());
 		assertNotNull(sDocGraph.getSTextualDSs().get(0));
-		assertEquals(text1+text2,sDocGraph.getSTextualDSs().get(0).getSText());
+		assertEquals(text1+" "+text2,sDocGraph.getSTextualDSs().get(0).getSText());
 		
 		//SToken
 		assertNotNull(sDocGraph.getSTokens());
