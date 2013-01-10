@@ -42,12 +42,6 @@
     </repository>
   </distributionManagement>
   <dependencies>
-   <dependency>
-      <groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
-      <artifactId>misc-TreetaggerModel</artifactId>
-      <version>[1.2.0,)</version>
-    </dependency>
-  
     <dependency>
     	<groupId>de.hu_berlin.german.korpling</groupId>
     	<artifactId>rst-api</artifactId>
@@ -55,17 +49,6 @@
     	<type>bundle</type>
     	<scope>compile</scope>
     </dependency>
-  
-    <!--  
-    <dependency>
-    	<groupId>de.hu_berlin.german.korpling.saltnpepper</groupId>
-    	<artifactId>misc-RSTModel</artifactId>
-    	<version>[0.0.1,)</version>
-    	<type>bundle</type>
-    	<scope>compile</scope>
-    </dependency>
-      -->
-  
   </dependencies>
   <build>
   	<plugins>

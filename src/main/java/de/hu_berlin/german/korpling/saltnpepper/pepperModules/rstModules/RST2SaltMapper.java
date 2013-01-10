@@ -20,6 +20,7 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.service.log.LogService;
@@ -28,18 +29,18 @@ import de.hu_berlin.german.korpling.rst.Group;
 import de.hu_berlin.german.korpling.rst.RSTDocument;
 import de.hu_berlin.german.korpling.rst.Relation;
 import de.hu_berlin.german.korpling.rst.Segment;
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer;
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.Token;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.exceptions.RSTImporterException;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDataSourceSequence;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STYPE_NAME;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.tokenizer.Tokenizer;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
 
 /**
@@ -76,7 +77,7 @@ public class RST2SaltMapper
 	 */
 	private void init()
 	{
-		this.tokenizer= new TTTokenizer();
+		this.tokenizer= new Tokenizer();
 		this.rstId2SStructure= new Hashtable<String, SStructure>();
 	}
 	
@@ -177,18 +178,6 @@ public class RST2SaltMapper
 		{
 			throw new RSTImporterException("No Property object is given, this seems to be an internal bug.");
 		}
-		else
-		{
-			if (this.getProps().getAbbreviationFolder()!= null)
-			{//abbreviation folder is set
-				this.tokenizer.setAbbreviationFolder(this.getProps().getAbbreviationFolder());
-			}//abbreviation folder is set
-			if (this.getProps().getLanguage()!= null)
-			{//abbreviation folder is set
-				if (TT_LANGUAGES.valueOf(this.getProps().getLanguage())!= null)
-					this.tokenizer.setLngLang(TT_LANGUAGES.valueOf(this.getProps().getLanguage()));
-			}//abbreviation folder is set
-		}
 	}
 	
 	/**
@@ -227,13 +216,13 @@ public class RST2SaltMapper
 	/**
 	 * The TreeTaggerTokenizer to tokenize an untokenized primary text.
 	 */
-	private TTTokenizer tokenizer= null;
+	private Tokenizer tokenizer= null;
 	
 	/**
 	 * Returns the TreeTaggerTokenizer to tokenize an untokenized primary text.
 	 * @return
 	 */
-	public TTTokenizer getTokenizer() {
+	public Tokenizer getTokenizer() {
 		return tokenizer;
 	}
 	/**
@@ -261,18 +250,46 @@ public class RST2SaltMapper
 		{
 			sText= SaltFactory.eINSTANCE.createSTextualDS();
 			this.getCurrentSDocument().getSDocumentGraph().addSNode(sText);
-			StringBuffer strBuffer= new StringBuffer();
+//			StringBuffer strBuffer= new StringBuffer();
 			for (Segment segment: segments)
 			{//for all segments adding their text, creating tokens, and relations	
-				List<Token> tokens= null;
-				try
-				{
-					tokens= tokenizer.tokenizeToToken(segment.getText());
+				List<SToken> tokens= null;
+				int start= 0;
+				if (sText.getSText()!= null)
+				{	
+					System.out.println("--> HERE ");
+					start= sText.getSText().length();
+					sText.setSText(sText.getSText()+ segment.getText());
 				}
-				catch (Exception e) 
+				else sText.setSText(segment.getText());
+				int end= sText.getSText().length();
+				
+				
+				
+				System.out.println("text: "+ sText.getSText());
+				System.out.println("text("+start+", "+end+"): "+ sText.getSText().substring(start, end));
+				
+				
+				Tokenizer tokenizer = this.getCurrentSDocument().getSDocumentGraph().createTokenizer();
+				tokens= tokenizer.tokenize(sText, null, start, end);
+				
+				for (SToken sTok: tokens)
 				{
-					throw new RSTImporterException("Cannot tokenize the following sentence: "+segment.getText(), e);
-				}				
+					EList<STYPE_NAME> rels= new BasicEList<STYPE_NAME>();
+					rels.add(STYPE_NAME.STEXT_OVERLAPPING_RELATION);
+					SDataSourceSequence seq= this.getCurrentSDocument().getSDocumentGraph().getOverlappedDSSequences(sTok, rels).get(0);
+					System.out.println(((STextualDS)seq.getSSequentialDS()).getSText().substring(seq.getSStart(), seq.getSEnd()));
+				}
+				
+				
+//				try
+//				{
+//					tokens= tokenizer.tokenizeToToken(segment.getText());
+//				}
+//				catch (Exception e) 
+//				{
+//					throw new RSTImporterException("Cannot tokenize the following sentence: "+segment.getText(), e);
+//				}				
 				if (	(tokens!= null)&&
 						(tokens.size()> 0))
 				{//if tokens exist	
@@ -286,27 +303,27 @@ public class RST2SaltMapper
 					this.rstId2SStructure.put(segment.getId(), sStruct);
 					this.getCurrentSDocument().getSDocumentGraph().addSNode(sStruct);
 					
-					for (Token token: tokens)
+					for (SToken sToken: tokens)
 					{//put each token in SDocumentGraph
-						SToken sToken= SaltFactory.eINSTANCE.createSToken();
-						this.getCurrentSDocument().getSDocumentGraph().addSNode(sToken);
-						
-						STextualRelation sTextRel= SaltFactory.eINSTANCE.createSTextualRelation();
-						sTextRel.setSTextualDS(sText);
-						sTextRel.setSToken(sToken);
-						sTextRel.setSStart(strBuffer.length()+ token.start);
-						sTextRel.setSEnd(strBuffer.length()+ token.end);
-						this.getCurrentSDocument().getSDocumentGraph().addSRelation(sTextRel);
+//						SToken sToken= SaltFactory.eINSTANCE.createSToken();
+//						this.getCurrentSDocument().getSDocumentGraph().addSNode(sToken);
+//						
+//						STextualRelation sTextRel= SaltFactory.eINSTANCE.createSTextualRelation();
+//						sTextRel.setSTextualDS(sText);
+//						sTextRel.setSToken(sToken);
+//						sTextRel.setSStart(strBuffer.length()+ token.start);
+//						sTextRel.setSEnd(strBuffer.length()+ token.end);
+//						this.getCurrentSDocument().getSDocumentGraph().addSRelation(sTextRel);
 						
 						SDominanceRelation sDomRel= SaltFactory.eINSTANCE.createSDominanceRelation();
 						sDomRel.setSSource(sStruct);
 						sDomRel.setSTarget(sToken);
 						this.getCurrentSDocument().getSDocumentGraph().addSRelation(sDomRel);
 					}//put each token in SDocumentGraph
-					strBuffer.append(segment.getText());
+//					strBuffer.append(segment.getText());
 				}//if tokens exist
 			}//for all segments
-			sText.setSText(strBuffer.toString());
+//			sText.setSText(strBuffer.toString());
 		}
 	}
 	
