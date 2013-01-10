@@ -204,37 +204,65 @@
                                 /></entry>
                             <entry>yes|no</entry>
                             <entry>optional</entry>
-                            <entry>--</entry>
+                            <entry>yes</entry>
                         </row>
                         <row>
                             <entry><xref linkend="prop_prop2" endterm="importer_prop2_title"
                             /></entry>
-                            <entry>URI</entry>
+                            <entry>String</entry>
                             <entry>optional</entry>
                             <entry>--</entry>
                         </row>
                         <row>
                             <entry><xref linkend="prop_prop3" endterm="importer_prop3_title"
                             /></entry>
-                            <entry>iso-639</entry>
+                            <entry>String</entry>
                             <entry>optional</entry>
                             <entry>--</entry>
+                        </row>
+                        <row>
+                            <entry><xref linkend="prop_prop4" endterm="importer_prop4_title"
+                            /></entry>
+                            <entry>String</entry>
+                            <entry>optional</entry>
+                            <entry>--</entry>
+                        </row>
+                        <row>
+                            <entry><xref linkend="prop_prop5" endterm="importer_prop5_title"
+                            /></entry>
+                            <entry>String</entry>
+                            <entry>optional</entry>
+                            <entry>' ' (Blank)</entry>
                         </row>
                     </tbody>
                 </tgroup>
             </table>
             <sect2 xml:id="prop_prop1">
                 <title xml:id="importer_prop1_title">rstImporter.tokenize</title>
-                <para>This parameter is an optional parameter and can be set to “yes” or “no”. If it is set to “yes”, the text being included in a segment will be tokenized. The tokens will be mapped to SToken-objects in Salt and attached to the SDocumentGraph-object. Further, an STextualRelation between a token and the text will be created and a dominance relation between the token and the segment. 
-                    The default configuration of this parameter is true, if non tokenization is required, this parameter must explicitly set to false.</para>
+                <para>This parameter is an optional parameter and can be set to “yes” or “no”. If it
+                    is set to “yes”, the text being included in a segment will be tokenized. The
+                    tokens will be mapped to <classname>SToken</classname>-objects in Salt and
+                    attached to the <classname>SDocumentGraph</classname>-object. Further, an
+                        <classname>STextualRelation</classname> between a token and the text will be
+                    created and a dominance relation between the token and the segment. The default
+                    configuration of this parameter is true, if non tokenization is required, this
+                    parameter must explicitly set to false.</para>
             </sect2>
             <sect2 xml:id="prop_prop2">
-                <title xml:id="importer_prop2_title">rstImporter.abbreviationFolder</title>
-                <para>This parameter is an optional parameter and can be set to a folder containing user-defined abbreviations for the tokenizer mechanism. If the parameter “rstImporter.tokenize“ is not set to “yes”, this parameter will be ignored.</para>
+                <title xml:id="importer_prop2_title">rstImporter.nodeKindName</title>
+                <para>Name of the property to specify the sName of the SAnnotattion to which the kind of a node (segment or group) is mapped.</para>
             </sect2>
             <sect2 xml:id="prop_prop3">
-                <title xml:id="importer_prop3_title">rstImporter.language</title>
-                <para>This parameter is optional and determines the language to be used for tokenizing of primary text. If no language is given, it will be detected automatically.</para>
+                <title xml:id="importer_prop3_title">rstImporter.nodeTypeName</title>
+                <para>Name of the property to specify the sName of the SAnnotation to which the type attribute of a node is mapped.</para>
+            </sect2>
+            <sect2 xml:id="prop_prop4">
+                <title xml:id="importer_prop4_title">rstImporter.relationTypeName</title>
+                <para>Name of the property to specify the sName of the SAnnotation to which the name attribute of a relation is mapped to.</para>
+            </sect2>
+            <sect2 xml:id="prop_prop5">
+                <title xml:id="importer_prop5_title">rstImporter.relationTypeName</title>
+                <para>A property to add a a separator like a blank between the text of segments, when it is concatenated to the primary text in STextualDS.For instance the segment text 'Is' of segment1 and the segment text 'this' of segment2 will be concatenated to an sText value 'is'SEPARATOR'this'.</para>
             </sect2>
         </sect1>
     </chapter>

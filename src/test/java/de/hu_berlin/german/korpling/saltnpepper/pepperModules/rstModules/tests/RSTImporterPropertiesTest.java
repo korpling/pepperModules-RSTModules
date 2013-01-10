@@ -1,11 +1,9 @@
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 
-import java.io.File;
 import java.util.Properties;
 
-import de.hu_berlin.german.korpling.saltnpepper.misc.treetagger.tokenizer.TTTokenizer.TT_LANGUAGES;
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 import junit.framework.TestCase;
+import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
 public class RSTImporterPropertiesTest extends TestCase {
 
@@ -33,21 +31,24 @@ public class RSTImporterPropertiesTest extends TestCase {
 		this.getFixture().addProperties(props);
 		
 		assertTrue(this.getFixture().isToTokenize());
-		assertNull(this.getFixture().getAbbreviationFolder());
-		assertNull(this.getFixture().getLanguage());
 		
 		this.setFixture(new RSTImporterProperties());
-		File abbrFolder= new File("/home/me/abbreviation");
-		String lang= TT_LANGUAGES.DE.toString();
 		String toTokenize= "no";
 		
-		props.setProperty(RSTImporterProperties.PROP_ABBFOLDER, abbrFolder.getAbsolutePath());
-		props.setProperty(RSTImporterProperties.PROP_LANGUAGE, lang.toString());
 		props.setProperty(RSTImporterProperties.PROP_TOKENIZE, toTokenize);
 		this.getFixture().addProperties(props);
 		
-		assertEquals(lang, this.getFixture().getLanguage());
-		assertEquals(abbrFolder.getAbsoluteFile(), this.getFixture().getAbbreviationFolder());
 		assertEquals(Boolean.FALSE, this.getFixture().isToTokenize());
+	}
+	
+	public void test_PROP_SEGMENT_SEPARATOR()
+	{
+		assertEquals(" ", this.getFixture().getSegementSeparator());
+		
+		String sep="##";
+		Properties props= new Properties();
+		props.put(RSTImporterProperties.PROP_SEGMENT_SEPARATOR, sep);
+		this.getFixture().addProperties(props);
+		assertEquals(sep, this.getFixture().getSegementSeparator());
 	}
 }

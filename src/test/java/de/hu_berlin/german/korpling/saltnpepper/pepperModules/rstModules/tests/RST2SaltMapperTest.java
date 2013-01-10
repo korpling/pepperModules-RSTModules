@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
 
 import de.hu_berlin.german.korpling.rst.Group;
 import de.hu_berlin.german.korpling.rst.RSTDocument;
@@ -30,7 +29,6 @@ import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RST2SaltMapper;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.resources.dot.Salt2DOT;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDataSourceSequence;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
@@ -107,7 +105,7 @@ public class RST2SaltMapperTest extends TestCase{
 		assertNotNull(sDocGraph.getSTextualDSs());
 		assertEquals(1,sDocGraph.getSTextualDSs().size());
 		assertNotNull(sDocGraph.getSTextualDSs().get(0));
-		assertEquals(text1+text2,sDocGraph.getSTextualDSs().get(0).getSText());
+		assertEquals(text1+" "+text2,sDocGraph.getSTextualDSs().get(0).getSText());
 		
 		//SToken
 		assertNotNull(sDocGraph.getSTokens());
