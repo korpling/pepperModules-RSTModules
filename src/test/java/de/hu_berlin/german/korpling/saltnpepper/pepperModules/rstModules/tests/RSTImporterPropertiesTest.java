@@ -28,7 +28,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 	public void testProperties()
 	{
 		Properties props= new Properties();
-		this.getFixture().addProperties(props);
+		this.getFixture().setPropertyValues(props);
 		
 		assertTrue(this.getFixture().isToTokenize());
 		
@@ -36,7 +36,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 		String toTokenize= "no";
 		
 		props.setProperty(RSTImporterProperties.PROP_TOKENIZE, toTokenize);
-		this.getFixture().addProperties(props);
+		this.getFixture().setPropertyValues(props);
 		
 		assertEquals(Boolean.FALSE, this.getFixture().isToTokenize());
 	}
@@ -48,7 +48,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 		String sep="##";
 		Properties props= new Properties();
 		props.put(RSTImporterProperties.PROP_SEGMENT_SEPARATOR, sep);
-		this.getFixture().addProperties(props);
+		this.getFixture().setPropertyValues(props);
 		assertEquals(sep, this.getFixture().getSegementSeparator());
 	}
 }
