@@ -26,14 +26,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.log.LogService;
 
 import de.hu_berlin.german.korpling.rst.RSTDocument;
@@ -54,7 +53,6 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
  *
  */
 @Component(name="RSTImporterComponent", factory="PepperImporterComponentFactory")
-@Service(value=PepperImporter.class)
 public class RSTImporter extends PepperImporterImpl implements PepperImporter
 {	
 	public RSTImporter()
