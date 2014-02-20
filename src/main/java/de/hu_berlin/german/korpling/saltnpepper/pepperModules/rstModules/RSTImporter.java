@@ -22,9 +22,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.osgi.service.component.annotations.Component;
 
 import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperImporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperMapper;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperImporterImpl;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperImporter;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperMapper;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.impl.PepperImporterImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 
 /**
@@ -39,12 +39,12 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
     public RSTImporter() {
 	super();
 	// setting name of module
-	this.name = "RSTImporter";
+	setName("RSTImporter");
 	// set list of formats supported by this module
-	this.addSupportedFormat("rs3", "1.0", null);
+	addSupportedFormat("rs3", "1.0", null);
 	// set empty property object to be filled via pepper-framework
-	this.setProperties(new RSTImporterProperties());
-	this.getSDocumentEndings().add(FILE_ENDING_RS3);
+	setProperties(new RSTImporterProperties());
+	getSDocumentEndings().add(FILE_ENDING_RS3);
     }
 
     /** resourceSet for loading EMF models **/

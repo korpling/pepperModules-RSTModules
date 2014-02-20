@@ -31,10 +31,10 @@ import de.hu_berlin.german.korpling.rst.RSTDocument;
 import de.hu_berlin.german.korpling.rst.Relation;
 import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.MAPPING_RESULT;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperMapper;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.impl.PepperMapperImpl;
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.exceptions.RSTImporterException;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.common.DOCUMENT_STATUS;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperMapper;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.exceptions.PepperModuleException;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.impl.PepperMapperImpl;
 import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
@@ -125,27 +125,26 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
      * OVERRIDE THIS METHOD FOR CUSTOMIZED MAPPING.
      */
     @Override
-    public MAPPING_RESULT mapSDocument() {
-
-	// load resource
-	Resource resource = this.getResourceSet().createResource(
-		this.getResourceURI());
-
-	if (resource == null)
-	    throw new RSTImporterException("Cannot load the RST file: "
-		    + this.getResourceURI() + ", becuase the resource is null.");
-	try {
-	    resource.load(null);
-	} catch (IOException e) {
-	    throw new RSTImporterException("Cannot load the RST file: "
-		    + this.getResourceURI() + ".", e);
-	}
-	RSTDocument rstDocument = null;
-	rstDocument = (RSTDocument) resource.getContents().get(0);
+    public DOCUMENT_STATUS mapSDocument() {
+		// load resource
+		Resource resource = this.getResourceSet().createResource(
+			this.getResourceURI());
 	
-	this.mapSDocument(rstDocument);
-	
-	return (MAPPING_RESULT.FINISHED);
+		if (resource == null)
+		    throw new PepperModuleException(this, "Cannot load the RST file: "
+			    + this.getResourceURI() + ", becuase the resource is null.");
+		try {
+		    resource.load(null);
+		} catch (IOException e) {
+		    throw new PepperModuleException(this, "Cannot load the RST file: "
+			    + this.getResourceURI() + ".", e);
+		}
+		RSTDocument rstDocument = null;
+		rstDocument = (RSTDocument) resource.getContents().get(0);
+		
+		this.mapSDocument(rstDocument);
+		
+		return (DOCUMENT_STATUS.COMPLETED);
     }
 
     /**
@@ -376,12 +375,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
     private void mapRelation(Relation relation) {
 	if (relation != null) {
 	    if (relation.getParent() == null)
-		throw new RSTImporterException(
+		throw new PepperModuleException(this,
 			"Cannot map the rst-model of file'"
 				+ this.getResourceURI()
 				+ "', because the parent of a relation is empty.");
 	    if (relation.getParent() == null)
-		throw new RSTImporterException(
+		throw new PepperModuleException(this,
 			"Cannot map the rst-model of file'"
 				+ this.getResourceURI()
 				+ "', because the source of a relation is empty.");
@@ -391,13 +390,13 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	    SStructure sTarget = this.rstId2SStructure.get(relation.getChild()
 		    .getId());
 	    if (sSource == null)
-		throw new RSTImporterException(
+		throw new PepperModuleException(this,
 			"Cannot map the rst-model of file'"
 				+ this.getResourceURI()
 				+ "', because the parent of a relation points to a non existing node with id '"
 				+ relation.getChild().getId() + "'.");
 	    if (sTarget == null)
-		throw new RSTImporterException(
+		throw new PepperModuleException(this,
 			"Cannot map the rst-model of file'"
 				+ this.getResourceURI()
 				+ "', because the parent of a relation belongs to a non existing node with id '"

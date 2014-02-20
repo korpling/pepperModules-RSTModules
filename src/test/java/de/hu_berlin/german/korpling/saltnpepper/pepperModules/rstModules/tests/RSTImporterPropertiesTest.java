@@ -20,6 +20,10 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
 public class RSTImporterPropertiesTest extends TestCase {
@@ -34,6 +38,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 		this.fixture = fixture;
 	}
 	
+	@Before
 	public void setUp()
 	{
 		this.setFixture(new RSTImporterProperties());
@@ -42,6 +47,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 	/**
 	 * Tests the special parameters.
 	 */
+	@Test
 	public void testProperties()
 	{
 		Properties props= new Properties();
@@ -58,6 +64,7 @@ public class RSTImporterPropertiesTest extends TestCase {
 		assertEquals(Boolean.FALSE, this.getFixture().isToTokenize());
 	}
 	
+	@Test
 	public void test_PROP_SEGMENT_SEPARATOR()
 	{
 		assertEquals(" ", this.getFixture().getSegementSeparator());
