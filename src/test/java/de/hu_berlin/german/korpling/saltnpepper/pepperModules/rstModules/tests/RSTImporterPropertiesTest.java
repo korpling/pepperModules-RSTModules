@@ -19,14 +19,13 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
-public class RSTImporterPropertiesTest extends TestCase {
+public class RSTImporterPropertiesTest {
 
 	protected RSTImporterProperties fixture= null;
 
