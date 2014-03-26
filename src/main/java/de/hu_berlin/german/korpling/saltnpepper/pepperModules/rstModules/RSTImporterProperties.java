@@ -17,8 +17,8 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperModuleProperties;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.pepperModules.PepperModuleProperty;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperties;
+import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperty;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
 
@@ -29,6 +29,11 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
  */
 public class RSTImporterProperties extends PepperModuleProperties 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String PREFIX="rstImporter.";
 	
 	/**

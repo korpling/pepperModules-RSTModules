@@ -17,10 +17,11 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 
-import junit.framework.TestCase;
-
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import de.hu_berlin.german.korpling.rst.Group;
 import de.hu_berlin.german.korpling.rst.RSTDocument;
@@ -37,7 +38,7 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructu
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
 
-public class RST2SaltMapperTest extends TestCase{
+public class RST2SaltMapperTest{
 
 	protected RST2SaltMapper fixture= null;
 
@@ -48,7 +49,7 @@ public class RST2SaltMapperTest extends TestCase{
 	public void setFixture(RST2SaltMapper fixture) {
 		this.fixture = fixture;
 	}
-	
+	@Before
 	public void setUp()
 	{
 		this.setFixture(new RST2SaltMapper());
@@ -94,6 +95,7 @@ public class RST2SaltMapperTest extends TestCase{
 	/**
 	 * Maps a {@link RSTDocument} having only {@link Segment} nodes.
 	 */
+	@Test
 	public void testMapSegmentsWithTokenize()
 	{
 		addSegments(this.getFixture().getCurrentRSTDocument());
@@ -145,6 +147,7 @@ public class RST2SaltMapperTest extends TestCase{
 	/**
 	 * Maps a {@link RSTDocument} having only {@link Segment} nodes.
 	 */
+	@Test
 	public void testMapSegmentsAndGroups()
 	{
 		String text1= "Jim went to Harvard,";
