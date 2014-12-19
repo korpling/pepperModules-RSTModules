@@ -87,12 +87,17 @@ This project has been funded by the [department of corpus linguistics and morpho
 RST is a theory on phrase-like constructs, which mean, that a token in RST is a phrase. When mapping these data to Salt, an SToken object represents such a phrase. Since in most cases this is not the wanted behaviour, the RSTImporter provides a mechanism to tokenize the phrases into word-like structures. Therefore it takes use of the tokenizer provided by Salt which copies the way of tokenization from the TreeTagger (see: www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger/ ). 
 RST in general forms a tree-like structure, which is mapped as this to a Salt model. 
 
-In RST, the primary data is represented by the textual values contained by Segment objects. The text of all Segment objects is mapped the sText value of exactly one STextualDS object. The text of a Segment object is concatenated to the sText prefixed by the blank seperator ' '. Imagine a text of segment1 'Is this example' and the text of segment2 'more complicated than it is supposed to be', than the sText value is 'Is this example more complicated than it is supposed to be'. The separator can be user defined or set to '' (empty) by taking use of the property .
-A Segment object itself is mapped to sStructure. As already mentioned, the RSTImporter provides the mechanism to tokenize a text in word-like tokens. Therefore, the text covered by a Segment object is tokenized to SToken objects. These SToken objects than are be related to SStructure object representing the Segment object via a SDominanceRelation. In case of a Segment object covers the text 'Is this example', the tokenizer will create SToken objects covering the text 'Is', 'this' and 'example'. The three tokens are dominated by one SStructure object. To avoid the tokenization, take use of the property .
+In RST, the primary data is represented by the textual values contained by Segment objects. The text of all Segment objects is mapped the sText value of exactly one STextualDS object. The text of a Segment object is concatenated to the sText prefixed by the blank seperator ' '. Imagine a text of segment1 'Is this example' and the text of segment2 'more complicated than it is supposed to be', than the sText value is 'Is this example more complicated than it is supposed to be'. The separator can be user defined or set to '' (empty) by taking use of the property <a href="segmentSeparator">rstImporter.segmentSeparator</a>.
+
+A Segment object itself is mapped to sStructure. As already mentioned, the RSTImporter provides the mechanism to tokenize a text in word-like tokens. Therefore, the text covered by a Segment object is tokenized to SToken objects. These SToken objects than are be related to SStructure object representing the Segment object via a SDominanceRelation. In case of a Segment object covers the text 'Is this example', the tokenizer will create SToken objects covering the text 'Is', 'this' and 'example'. The three tokens are dominated by one SStructure object. To avoid the tokenization, take use of the property <a href="tokenize">rstImporter.tokenize</a>..
+
 Each Group object is also mapped to a SStructure object. The tree-like structure given by Group objects and Relation objects related to Group or Segment objects is mapped to SStructure objects related via SDominanceRelation objects. Imagine a Group object 'grp1', containing another Group object 'grp2' and a Segment object 'seg1'. This will be mapped into a Salt model having three SStructure objects 'struct1' for 'grp1', 'struct2' for 'grp2' and 'struct3' for 'seg1'. Further, two SDominanceRelation objects 'dom1' and 'dom2' are created with 'struct1 -dom1-> struct2' and 'struct1 -dom2-> struct3'.
-Since all Group and Segment objects are mapped to SStructure objects, we won't loose the information, what has been the source. Therefore, for the kind of the node 'group' or 'segment' a SAnnotation object is created and related to the SStructure object. The sName of this SAnnotation object is set to 'kind'. To change the sName, take use of the property .
-Also for the type attribute of a Group or Segment object an SAnnotation object is created. Its sName is set to 'type'. To adopt the sName, take use of the property 
-The name of a Relation object is mapped to a SAnnotation object having the sName 'name'. To avoid, that a bunch of Relation object get the same name, an artificial number is concatenated to the name (SDominanceRelation.sName='name'+ occurance). For instance there are two Relation objects haveing the name 'rel', than the first will get the sName 'rel1' and the second will get the sName 'rel2'.
+
+Since all Group and Segment objects are mapped to SStructure objects, we won't loose the information, what has been the source. Therefore, for the kind of the node 'group' or 'segment' a SAnnotation object is created and related to the SStructure object. The sName of this SAnnotation object is set to 'kind'. To change the sName, take use of the property <a href="nodeKindName">rstImporter.nodeKindName</a>.
+
+Also for the type attribute of a Group or Segment object an SAnnotation object is created. Its sName is set to 'type'. To adopt the sName, take use of the property <a href="nodeTypeName">rstImporter.nodeTypeName</a>
+
+The name of a Relation object is mapped to a SAnnotation object having the sName 'name'. To avoid, that a bunch of Relation object get the same name, an artificial number is concatenated to the name (SDominanceRelation.sName='name'+ occurance). For instance there are two Relation objects having the name 'rel', than the first will get the sName 'rel1' and the second will get the sName 'rel2'.
 The type of a Relation object ( //relations/rel@type in rs3) is mapped to the sType of a created SDominanceRelation object. 
 
 ## Properties
@@ -105,19 +110,19 @@ properties to customize importer behaviour
 |rstImporter.nodeKindName     |	String          |optional             |--           |
 |rstImporter.nodeTypeName     |	String          |optional             |--           |
 |rstImporter.relationTypeName |	String          |optional             |--           |
-|rstImporter.relationTypeName |	String          |optional             |' ' (Blank)  |
+|rstImporter.segmentSeparator |	String          |optional             |' ' (Blank)  |
 
-### rstImporter.tokenize
+### <a name="tokenize">rstImporter.tokenize</a>
 This parameter is an optional parameter and can be set to “yes” or “no”. If it is set to “yes”, the text being included in a segment will be tokenized. The tokens will be mapped to SToken-objects in Salt and attached to the SDocumentGraph-object. Further, an STextualRelation between a token and the text will be created and a dominance relation between the token and the segment. The default configuration of this parameter is true, if non tokenization is required, this parameter must explicitly set to false.
 
-### rstImporter.nodeKindName
+### <a name="nodeKindName">rstImporter.nodeKindName</a>
 Name of the property to specify the sName of the SAnnotattion to which the kind of a node (segment or group) is mapped.
 
-### rstImporter.nodeTypeName
+### <a name="nodeTypeName">rstImporter.nodeTypeName</a>
 Name of the property to specify the sName of the SAnnotation to which the type attribute of a node is mapped.
 
-### rstImporter.relationTypeName
+### <a name="relationTypeName">rstImporter.relationTypeName</a>
 Name of the property to specify the sName of the SAnnotation to which the name attribute of a relation is mapped to.
 
-### rstImporter.relationTypeName
+### <a name="segmentSeparator">rstImporter.segmentSeparator</a>
 A property to add a a separator like a blank between the text of segments, when it is concatenated to the primary text in STextualDS.For instance the segment text 'Is' of segment1 and the segment text 'this' of segment2 will be concatenated to an sText value 'is'SEPARATOR'this'.
