@@ -27,7 +27,7 @@ import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImpo
 
 public class RSTImporterPropertiesTest {
 
-	protected RSTImporterProperties fixture= null;
+	protected RSTImporterProperties fixture = null;
 
 	public RSTImporterProperties getFixture() {
 		return fixture;
@@ -36,40 +36,37 @@ public class RSTImporterPropertiesTest {
 	public void setFixture(RSTImporterProperties fixture) {
 		this.fixture = fixture;
 	}
-	
+
 	@Before
-	public void setUp()
-	{
+	public void setUp() {
 		this.setFixture(new RSTImporterProperties());
 	}
-	
+
 	/**
 	 * Tests the special parameters.
 	 */
 	@Test
-	public void testProperties()
-	{
-		Properties props= new Properties();
+	public void testProperties() {
+		Properties props = new Properties();
 		this.getFixture().setPropertyValues(props);
-		
+
 		assertTrue(this.getFixture().isToTokenize());
-		
+
 		this.setFixture(new RSTImporterProperties());
-		String toTokenize= "no";
-		
+		String toTokenize = "no";
+
 		props.setProperty(RSTImporterProperties.PROP_TOKENIZE, toTokenize);
 		this.getFixture().setPropertyValues(props);
-		
+
 		assertEquals(Boolean.FALSE, this.getFixture().isToTokenize());
 	}
-	
+
 	@Test
-	public void test_PROP_SEGMENT_SEPARATOR()
-	{
+	public void test_PROP_SEGMENT_SEPARATOR() {
 		assertEquals(" ", this.getFixture().getSegementSeparator());
-		
-		String sep="##";
-		Properties props= new Properties();
+
+		String sep = "##";
+		Properties props = new Properties();
 		props.put(RSTImporterProperties.PROP_SEGMENT_SEPARATOR, sep);
 		this.getFixture().setPropertyValues(props);
 		assertEquals(sep, this.getFixture().getSegementSeparator());
