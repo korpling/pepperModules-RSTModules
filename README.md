@@ -107,6 +107,7 @@ properties to customize importer behaviour
 |Name of property	          |Type of property	| optional/ mandatory |default value|
 |-----------------------------|-----------------|---------------------|-------------|
 |rstImporter.tokenize         | yes|no          |optional             |yes          |
+|simpleTokenize               | String          |optional             |--           |
 |rstImporter.nodeKindName     |	String          |optional             |--           |
 |rstImporter.nodeTypeName     |	String          |optional             |--           |
 |rstImporter.relationTypeName |	String          |optional             |--           |
@@ -114,6 +115,9 @@ properties to customize importer behaviour
 
 ### <a name="tokenize">rstImporter.tokenize</a>
 This parameter is an optional parameter and can be set to “yes” or “no”. If it is set to “yes”, the text being included in a segment will be tokenized. The tokens will be mapped to SToken-objects in Salt and attached to the SDocumentGraph-object. Further, an STextualRelation between a token and the text will be created and a dominance relation between the token and the segment. The default configuration of this parameter is true, if non tokenization is required, this parameter must explicitly set to false.
+
+### <a name="simpleTokenize">simpleTokenize</a>
+Switches on a very simple tokenization. With this property you can pass a list of characters, which should be used as separators to find the borders of tokens e.g. \"' ','.'\" to use a blank and a dot. Note that using this property will overwrite the default TreeTagger tokenizer. This property needs rstImporter.tokenize to be set to true.
 
 ### <a name="nodeKindName">rstImporter.nodeKindName</a>
 Name of the property to specify the sName of the SAnnotattion to which the kind of a node (segment or group) is mapped.

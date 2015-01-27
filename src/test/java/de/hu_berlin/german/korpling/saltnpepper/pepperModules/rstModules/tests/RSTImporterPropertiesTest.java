@@ -21,8 +21,8 @@ import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
 public class RSTImporterPropertiesTest {
@@ -63,12 +63,41 @@ public class RSTImporterPropertiesTest {
 
 	@Test
 	public void test_PROP_SEGMENT_SEPARATOR() {
-		assertEquals(" ", this.getFixture().getSegementSeparator());
+		assertEquals(" ", this.getFixture().getSegmentSeparator());
 
 		String sep = "##";
 		Properties props = new Properties();
 		props.put(RSTImporterProperties.PROP_SEGMENT_SEPARATOR, sep);
 		this.getFixture().setPropertyValues(props);
-		assertEquals(sep, this.getFixture().getSegementSeparator());
+		assertEquals(sep, this.getFixture().getSegmentSeparator());
+	}
+	
+	@Test
+	public void test_PROP_SIMPLE_TOKENIZE_1(){
+		assertEquals(null, this.getFixture().getSimpleTokenizationSeparators());
+	}
+	@Test
+	public void test_PROP_SIMPLE_TOKENIZE_2(){
+		String sep = "' ', '.'";
+		Properties props = new Properties();
+		props.put(RSTImporterProperties.PROP_SIMPLE_TOKENIZE, sep);
+		this.getFixture().setPropertyValues(props);
+		
+		assertEquals(2, this.getFixture().getSimpleTokenizationSeparators().size());
+		assertEquals(new Character(' '), this.getFixture().getSimpleTokenizationSeparators().get(0));
+		assertEquals(new Character('.'), this.getFixture().getSimpleTokenizationSeparators().get(1));
+	}
+	@Test
+	public void test_PROP_SIMPLE_TOKENIZE_3(){
+		String sep = "' ', '\\'', ',', '\\\\'";
+		Properties props = new Properties();
+		props.put(RSTImporterProperties.PROP_SIMPLE_TOKENIZE, sep);
+		this.getFixture().setPropertyValues(props);
+		
+		assertEquals(4, this.getFixture().getSimpleTokenizationSeparators().size());
+		assertEquals(new Character(' '), this.getFixture().getSimpleTokenizationSeparators().get(0));
+		assertEquals(new Character('\''), this.getFixture().getSimpleTokenizationSeparators().get(1));
+		assertEquals(new Character(','), this.getFixture().getSimpleTokenizationSeparators().get(2));
+		assertEquals(new Character('\\'), this.getFixture().getSimpleTokenizationSeparators().get(3));
 	}
 }

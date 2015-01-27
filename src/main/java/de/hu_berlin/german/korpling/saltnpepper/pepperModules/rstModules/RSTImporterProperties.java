@@ -17,6 +17,9 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperties;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperty;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
@@ -41,6 +44,11 @@ public class RSTImporterProperties extends PepperModuleProperties {
 	 * tokenized.
 	 */
 	public final static String PROP_TOKENIZE = PREFIX + "tokenize";
+	/**
+	 * Name of the property to specify the sName of the SAnnotation to which the
+	 * name attribute of a relation is mapped to
+	 */
+	public final static String PROP_SIMPLE_TOKENIZE = "simpleTokenize";
 	/**
 	 * Name of the property to specify the sName of the {@link SAnnotation} to
 	 * which the kind of a node (segment or group) is mapped.
@@ -68,6 +76,7 @@ public class RSTImporterProperties extends PepperModuleProperties {
 
 	public RSTImporterProperties() {
 		this.addProperty(new PepperModuleProperty<String>(PROP_TOKENIZE, String.class, "Determines if the rst data have to be tokenized during import. Possible values are 'yes' and 'no'.", "yes", false));
+		this.addProperty(new PepperModuleProperty<String>(PROP_SIMPLE_TOKENIZE, String.class, "Switches on a very simple tokenization. With this property you can pass a list of characters, which should be used as separators to find the borders of tokens e.g. \"' ','.'\" to use a blank and a dot. Note that using this property will overwrite the default TreeTagger tokenizer. This property needs "+PROP_SIMPLE_TOKENIZE+" to be set to true. ", false));
 		this.addProperty(new PepperModuleProperty<String>(PROP_NODE_KIND_NAME, String.class, "Specifies the sName of the SAnnotation to which the kind of a node (segment or group) is mapped to.", "kind", false));
 		this.addProperty(new PepperModuleProperty<String>(PROP_NODE_TYPE_NAME, String.class, "Specifies the sName of the SAnnotation to which the type attribute of a node is mapped to.", "type", false));
 		this.addProperty(new PepperModuleProperty<String>(PROP_RELATION_NAME, String.class, "Specifies the sName of the SAnnotation to which the name attribute of a relation is mapped to.", "relname", false));
@@ -100,6 +109,24 @@ public class RSTImporterProperties extends PepperModuleProperties {
 				this.isToTokenize = true;
 		}
 		return isToTokenize;
+	}
+
+	/** list of separators in case of simple tokenization is used **/
+	private List<Character> simpleTokSeparators = null;
+
+	/**
+	 * Returns a list of separators in case of simple tokenization is used.
+	 * 
+	 * @return the isToTokenize
+	 */
+	public List<Character> getSimpleTokenizationSeparators() {
+		if (simpleTokSeparators == null) {
+			String seps = ((String) this.getProperty(PROP_SIMPLE_TOKENIZE).getValue());
+			if (seps != null) {
+				simpleTokSeparators= this.stringToCharList(seps);
+			}
+		}
+		return simpleTokSeparators;
 	}
 
 	// ================================================ end: tokenizing
@@ -143,7 +170,7 @@ public class RSTImporterProperties extends PepperModuleProperties {
 	 * 
 	 * @return
 	 */
-	public String getSegementSeparator() {
+	public String getSegmentSeparator() {
 		String sep = ((String) this.getProperty(PROP_SEGMENT_SEPARATOR).getValue());
 		return (sep);
 	}

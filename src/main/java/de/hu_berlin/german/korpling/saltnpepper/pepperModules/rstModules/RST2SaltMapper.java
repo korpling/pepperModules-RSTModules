@@ -43,6 +43,7 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructu
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
+import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.tokenizer.SimpleTokenizer;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.tokenizer.Tokenizer;
 import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
 
@@ -228,14 +229,20 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				int start = 0;
 				if (sText.getSText() != null) {
 					start = sText.getSText().length();
-					sText.setSText(sText.getSText() + ((RSTImporterProperties) this.getProperties()).getSegementSeparator() + segment.getText());
+					sText.setSText(sText.getSText() + ((RSTImporterProperties) this.getProperties()).getSegmentSeparator() + segment.getText());
 				} else
 					sText.setSText(segment.getText());
 				int end = sText.getSText().length();
-
-				Tokenizer tokenizer = this.getSDocument().getSDocumentGraph().createTokenizer();
-				tokens = tokenizer.tokenize(sText, null, start, end);
-
+				
+				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
+					SimpleTokenizer tokenizer= new SimpleTokenizer();
+					tokenizer.setsDocumentGraph(getSDocument().getSDocumentGraph());
+					Character[] seps= (Character[])((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray();
+					tokenizer.tokenize(sText, seps);
+				}else{
+					Tokenizer tokenizer = this.getSDocument().getSDocumentGraph().createTokenizer();
+					tokens = tokenizer.tokenize(sText, null, start, end);
+				}
 				if ((tokens != null) && (tokens.size() > 0)) {// if tokens exist
 					SStructure sStruct = SaltFactory.eINSTANCE.createSStructure();
 					sStruct.setSName(segment.getId());
@@ -306,7 +313,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				this.getSDocument().getSDocumentGraph().addSRelation(sDomRel);
 
 				if (i != 0)
-					strBuffer.append(((RSTImporterProperties) this.getProperties()).getSegementSeparator());
+					strBuffer.append(((RSTImporterProperties) this.getProperties()).getSegmentSeparator());
 				strBuffer.append(segment.getText());
 			}// for all segments
 			sText.setSText(strBuffer.toString());
