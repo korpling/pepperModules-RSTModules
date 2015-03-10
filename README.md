@@ -57,7 +57,7 @@ A detailed description of the Pepper workflow can be found on the [Pepper projec
 ```xml
 <importer name="RSTImporter" path="PATH_TO_CORPUS">
   <customization>
-    <property key="PROPERTY_NAME">PROPERTY_VALUE</key>
+    <property key="PROPERTY_NAME">PROPERTY_VALUE</property>
   </customization>
 </importer>
 ```
@@ -121,7 +121,7 @@ This parameter is an optional parameter and can be set to “yes” or “no”.
 ### <a name="simpleTokenize">simpleTokenize</a>
 Switches on a very simple tokenization. With this property you can pass a list of characters, which should be used as separators to find the borders of tokens e.g. ' ', '.' to use a blank and a dot. Note that using this property will overwrite the default TreeTagger tokenizer. This property needs rstImporter.tokenize to be set to true.
 ```xml
-<property key="simpleTokenize">' ','.'</key>
+<property key="simpleTokenize">' ','.'</property>
 ```
 
 ### <a name="nodeKindName">rstImporter.nodeKindName</a>
