@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>pepperModules-RSTModules</artifactId>
-  <version>0.0.6-SNAPSHOT</version>
+  <version>0.0.6</version>
   <packaging>bundle</packaging>
   <description>The project RSTModules provides an importer for Pepper to import data coming from rs3 format to salt. The mapper is based on the rst-api (see: https://korpling.german.hu-berlin.de/p/projects/rst-api/wiki).</description>
   <url>https://korpling.german.hu-berlin.de/p/projects/peppermodules-rstmodules</url>
