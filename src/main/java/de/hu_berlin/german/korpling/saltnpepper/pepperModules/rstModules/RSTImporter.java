@@ -1,5 +1,5 @@
 /**
- * Copyright 2009 Humboldt University of Berlin, INRIA.
+ * Copyright 2009 Humboldt-Universität zu Berlin, INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,38 +34,37 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
  */
 @Component(name = "RSTImporterComponent", factory = "PepperImporterComponentFactory")
 public class RSTImporter extends PepperImporterImpl implements PepperImporter {
-    public static final String FILE_ENDING_RS3 = "rs3";
+	public static final String FILE_ENDING_RS3 = "rs3";
 
-    public RSTImporter() {
-	super();
-	// setting name of module
-	setName("RSTImporter");
-	// set list of formats supported by this module
-	addSupportedFormat("rs3", "1.0", null);
-	// set empty property object to be filled via pepper-framework
-	setProperties(new RSTImporterProperties());
-	getSDocumentEndings().add(FILE_ENDING_RS3);
-    }
-
-    /** resourceSet for loading EMF models **/
-    private ResourceSet resourceSet = null;
-
-    /**
-     * Creates a mapper of type {@link PAULA2SaltMapper}. {@inheritDoc
-     * PepperModule#createPepperMapper(SElementId)}
-     */
-    @Override
-    public PepperMapper createPepperMapper(SElementId sElementId) {
-	RST2SaltMapper mapper = new RST2SaltMapper();
-
-	// Register XML resource factory
-	if (resourceSet == null) {
-	    resourceSet = new ResourceSetImpl();
-	    resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
-		    .put(FILE_ENDING_RS3, new RSTResourceFactory());
+	public RSTImporter() {
+		super();
+		// setting name of module
+		setName("RSTImporter");
+		// set list of formats supported by this module
+		addSupportedFormat("rs3", "1.0", null);
+		// set empty property object to be filled via pepper-framework
+		setProperties(new RSTImporterProperties());
+		getSDocumentEndings().add(FILE_ENDING_RS3);
 	}
-	mapper.setResourceSet(resourceSet);
 
-	return (mapper);
-    }
+	/** resourceSet for loading EMF models **/
+	private ResourceSet resourceSet = null;
+
+	/**
+	 * Creates a mapper of type {@link PAULA2SaltMapper}. {@inheritDoc
+	 * PepperModule#createPepperMapper(SElementId)}
+	 */
+	@Override
+	public PepperMapper createPepperMapper(SElementId sElementId) {
+		RST2SaltMapper mapper = new RST2SaltMapper();
+
+		// Register XML resource factory
+		if (resourceSet == null) {
+			resourceSet = new ResourceSetImpl();
+			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(FILE_ENDING_RS3, new RSTResourceFactory());
+		}
+		mapper.setResourceSet(resourceSet);
+
+		return (mapper);
+	}
 }

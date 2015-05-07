@@ -1,5 +1,5 @@
 /**
- * Copyright 2009 Humboldt University of Berlin, INRIA.
+ * Copyright 2009 Humboldt-Universität zu Berlin, INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,18 @@ import de.hu_berlin.german.korpling.saltnpepper.pepper.common.FormatDesc;
 import de.hu_berlin.german.korpling.saltnpepper.pepper.testFramework.PepperImporterTest;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporter;
 
-public class RSTImporterTest extends PepperImporterTest 
-{
+public class RSTImporterTest extends PepperImporterTest {
 	@Before
-	public void setUp()
-	{
+	public void setUp() {
 		setFixture(new RSTImporter());
-		
-		FormatDesc formatDef= new FormatDesc();
+
+		FormatDesc formatDef = new FormatDesc();
 		formatDef.setFormatName("rs3");
 		formatDef.setFormatVersion("1.0");
 		this.supportedFormatsCheck.add(formatDef);
-		
-		File resFolder= new File("./src/main/resources");
-		
+
+		File resFolder = new File("./src/main/resources");
+
 		this.setResourcesURI(URI.createFileURI(resFolder.getAbsolutePath()));
 	}
 }
