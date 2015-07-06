@@ -17,6 +17,7 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.osgi.service.component.annotations.Component;
@@ -40,6 +41,9 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 		super();
 		// setting name of module
 		setName("RSTImporter");
+		setSupplierContact(URI.createURI("saltnpepper@lists.hu-berlin.de"));
+		setSupplierHomepage(URI.createURI("https://github.com/korpling/pepperModules-RSTModules"));
+		setDesc("This importer transforms data in rs3 format produced by the RST Tool (see: http://www.wagsoft.com/RSTTool/) to a Salt model.");
 		// set list of formats supported by this module
 		addSupportedFormat("rs3", "1.0", null);
 		// set empty property object to be filled via pepper-framework
