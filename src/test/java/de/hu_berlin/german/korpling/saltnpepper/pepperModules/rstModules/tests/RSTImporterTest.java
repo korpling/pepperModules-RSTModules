@@ -19,12 +19,13 @@ package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 
 import java.io.File;
 
+import org.corpus_tools.pepper.common.FormatDesc;
+import org.corpus_tools.pepper.testFramework.PepperImporterTest;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
 
-import de.hu_berlin.german.korpling.saltnpepper.pepper.common.FormatDesc;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.testFramework.PepperImporterTest;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporter;
+
 
 public class RSTImporterTest extends PepperImporterTest {
 	@Before

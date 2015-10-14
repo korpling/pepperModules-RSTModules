@@ -17,16 +17,17 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
+import org.corpus_tools.pepper.common.PepperConfiguration;
+import org.corpus_tools.pepper.impl.PepperImporterImpl;
+import org.corpus_tools.pepper.modules.PepperImporter;
+import org.corpus_tools.pepper.modules.PepperMapper;
+import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.osgi.service.component.annotations.Component;
 
 import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperImporter;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperMapper;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.impl.PepperImporterImpl;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SElementId;
 
 /**
  * @author Florian Zipser
@@ -41,14 +42,14 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 		super();
 		// setting name of module
 		setName("RSTImporter");
-		setSupplierContact(URI.createURI("saltnpepper@lists.hu-berlin.de"));
+		setSupplierContact(URI.createURI(PepperConfiguration.EMAIL));
 		setSupplierHomepage(URI.createURI("https://github.com/korpling/pepperModules-RSTModules"));
 		setDesc("This importer transforms data in rs3 format produced by the RST Tool (see: http://www.wagsoft.com/RSTTool/) to a Salt model.");
 		// set list of formats supported by this module
 		addSupportedFormat("rs3", "1.0", null);
 		// set empty property object to be filled via pepper-framework
 		setProperties(new RSTImporterProperties());
-		getSDocumentEndings().add(FILE_ENDING_RS3);
+		getDocumentEndings().add(FILE_ENDING_RS3);
 	}
 
 	/** resourceSet for loading EMF models **/
@@ -56,10 +57,10 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 
 	/**
 	 * Creates a mapper of type {@link PAULA2SaltMapper}. {@inheritDoc
-	 * PepperModule#createPepperMapper(SElementId)}
+	 * PepperModule#createPepperMapper(Identifier)}
 	 */
 	@Override
-	public PepperMapper createPepperMapper(SElementId sElementId) {
+	public PepperMapper createPepperMapper(Identifier sElementId) {
 		RST2SaltMapper mapper = new RST2SaltMapper();
 
 		// Register XML resource factory

@@ -21,7 +21,21 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.eclipse.emf.common.util.EList;
+import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
+import org.corpus_tools.pepper.impl.PepperMapperImpl;
+import org.corpus_tools.pepper.modules.PepperMapper;
+import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SDocument;
+import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SDominanceRelation;
+import org.corpus_tools.salt.common.SStructure;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.STextualRelation;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
+import org.corpus_tools.salt.common.tokenizer.Tokenizer;
+import org.corpus_tools.salt.core.SAnnotation;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -31,21 +45,6 @@ import de.hu_berlin.german.korpling.rst.RSTDocument;
 import de.hu_berlin.german.korpling.rst.Relation;
 import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.common.DOCUMENT_STATUS;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperMapper;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.exceptions.PepperModuleException;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.impl.PepperMapperImpl;
-import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sCorpusStructure.SDocument;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.tokenizer.SimpleTokenizer;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.tokenizer.Tokenizer;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -120,7 +119,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	// ================================================ end: current SDocument
 
 	/**
-	 * {@inheritDoc PepperMapper#setSDocument(SDocument)}
+	 * {@inheritDoc PepperMapper#setDocument(SDocument)}
 	 * 
 	 * OVERRIDE THIS METHOD FOR CUSTOMIZED MAPPING.
 	 */
@@ -146,14 +145,14 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 	/**
 	 * Maps the given {@link RSTDocument} to th {@link SDocument} given at
-	 * {@link #getSDocument()}.
+	 * {@link #getDocument()}.
 	 * 
 	 * @param rstDocument
 	 */
 	public void mapSDocument(RSTDocument rstDocument) {
 
-		if (this.getSDocument().getSDocumentGraph() == null)
-			this.getSDocument().setSDocumentGraph(SaltFactory.eINSTANCE.createSDocumentGraph());
+		if (this.getDocument().getDocumentGraph() == null)
+			this.getDocument().setDocumentGraph(SaltFactory.createSDocumentGraph());
 		this.setCurrentRSTDocument(rstDocument);
 
 		// map segments to STextualDS, Tokens and SStructures
@@ -216,50 +215,50 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 *            a list of {@link Segment} objects
 	 * @return
 	 */
-	public void mapSegmentsWithTokenize(EList<Segment> segments) {
+	public void mapSegmentsWithTokenize(List<Segment> segments) {
 		STextualDS sText = null;
 		if ((segments != null) && (segments.size() > 0)) {
-			sText = SaltFactory.eINSTANCE.createSTextualDS();
-			this.getSDocument().getSDocumentGraph().addSNode(sText);
+			sText = SaltFactory.createSTextualDS();
+			this.getDocument().getDocumentGraph().addNode(sText);
 			// StringBuffer strBuffer= new StringBuffer();
 			for (Segment segment : segments) {// for all segments adding their
 				// text, creating tokens, and
 				// relations
 				List<SToken> tokens = null;
 				int start = 0;
-				if (sText.getSText() != null) {
-					start = sText.getSText().length();
-					sText.setSText(sText.getSText() + ((RSTImporterProperties) this.getProperties()).getSegmentSeparator() + segment.getText());
+				if (sText.getText() != null) {
+					start = sText.getText().length();
+					sText.setText(sText.getText() + ((RSTImporterProperties) this.getProperties()).getSegmentSeparator() + segment.getText());
 				} else
-					sText.setSText(segment.getText());
-				int end = sText.getSText().length();
+					sText.setText(segment.getText());
+				int end = sText.getText().length();
 				
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
-					tokenizer.setsDocumentGraph(getSDocument().getSDocumentGraph());
+					tokenizer.setDocumentGraph(getDocument().getDocumentGraph());
 					Character[] seps= (Character[])((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray();
 					tokenizer.tokenize(sText, seps);
 				}else{
-					Tokenizer tokenizer = this.getSDocument().getSDocumentGraph().createTokenizer();
+					Tokenizer tokenizer = this.getDocument().getDocumentGraph().createTokenizer();
 					tokens = tokenizer.tokenize(sText, null, start, end);
 				}
 				if ((tokens != null) && (tokens.size() > 0)) {// if tokens exist
-					SStructure sStruct = SaltFactory.eINSTANCE.createSStructure();
-					sStruct.setSName(segment.getId());
-					sStruct.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
+					SStructure sStruct = SaltFactory.createSStructure();
+					sStruct.setName(segment.getId());
+					sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
 					if (segment.getType() != null)
-						sStruct.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
+						sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
 
 					// puts segment.id and mapped SStructure-object into table
 					this.rstId2SStructure.put(segment.getId(), sStruct);
-					this.getSDocument().getSDocumentGraph().addSNode(sStruct);
+					this.getDocument().getDocumentGraph().addNode(sStruct);
 
 					for (SToken sToken : tokens) {// put each token in
 						// SDocumentGraph
-						SDominanceRelation sDomRel = SaltFactory.eINSTANCE.createSDominanceRelation();
-						sDomRel.setSSource(sStruct);
-						sDomRel.setSTarget(sToken);
-						this.getSDocument().getSDocumentGraph().addSRelation(sDomRel);
+						SDominanceRelation sDomRel = SaltFactory.createSDominanceRelation();
+						sDomRel.setSource(sStruct);
+						sDomRel.setTarget(sToken);
+						this.getDocument().getDocumentGraph().addRelation(sDomRel);
 					}// put each token in SDocumentGraph
 				}// if tokens exist
 			}// for all segments
@@ -276,11 +275,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 * @param segments
 	 * @return
 	 */
-	private void mapSegmentsWithoutTokenize(EList<Segment> segments) {
+	private void mapSegmentsWithoutTokenize(List<Segment> segments) {
 		STextualDS sText = null;
 		if ((segments != null) && (segments.size() > 0)) {
-			sText = SaltFactory.eINSTANCE.createSTextualDS();
-			this.getSDocument().getSDocumentGraph().addSNode(sText);
+			sText = SaltFactory.createSTextualDS();
+			this.getDocument().getDocumentGraph().addNode(sText);
 			StringBuffer strBuffer = new StringBuffer();
 
 			int i = 0;
@@ -288,35 +287,35 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				// text, creating tokens, and
 				// relations
 				i++;
-				SStructure sStruct = SaltFactory.eINSTANCE.createSStructure();
-				sStruct.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
+				SStructure sStruct = SaltFactory.createSStructure();
+				sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
 				if (segment.getType() != null)
-					sStruct.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
-				sStruct.setSName(segment.getId());
+					sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
+				sStruct.setName(segment.getId());
 				// puts segment.id and mapped SStructure-object into table
 				this.rstId2SStructure.put(segment.getId(), sStruct);
-				this.getSDocument().getSDocumentGraph().addSNode(sStruct);
+				this.getDocument().getDocumentGraph().addNode(sStruct);
 
-				SToken sToken = SaltFactory.eINSTANCE.createSToken();
-				this.getSDocument().getSDocumentGraph().addSNode(sToken);
+				SToken sToken = SaltFactory.createSToken();
+				this.getDocument().getDocumentGraph().addNode(sToken);
 
-				STextualRelation sTextRel = SaltFactory.eINSTANCE.createSTextualRelation();
-				sTextRel.setSTextualDS(sText);
-				sTextRel.setSToken(sToken);
-				sTextRel.setSStart(strBuffer.length());
-				sTextRel.setSEnd(strBuffer.length() + segment.getText().length());
-				this.getSDocument().getSDocumentGraph().addSRelation(sTextRel);
+				STextualRelation sTextRel = SaltFactory.createSTextualRelation();
+				sTextRel.setTarget(sText);
+				sTextRel.setSource(sToken);
+				sTextRel.setStart(strBuffer.length());
+				sTextRel.setEnd(strBuffer.length() + segment.getText().length());
+				this.getDocument().getDocumentGraph().addRelation(sTextRel);
 
-				SDominanceRelation sDomRel = SaltFactory.eINSTANCE.createSDominanceRelation();
-				sDomRel.setSSource(sStruct);
-				sDomRel.setSTarget(sToken);
-				this.getSDocument().getSDocumentGraph().addSRelation(sDomRel);
+				SDominanceRelation sDomRel = SaltFactory.createSDominanceRelation();
+				sDomRel.setSource(sStruct);
+				sDomRel.setTarget(sToken);
+				this.getDocument().getDocumentGraph().addRelation(sDomRel);
 
 				if (i != 0)
 					strBuffer.append(((RSTImporterProperties) this.getProperties()).getSegmentSeparator());
 				strBuffer.append(segment.getText());
 			}// for all segments
-			sText.setSText(strBuffer.toString());
+			sText.setText(strBuffer.toString());
 		}
 	}
 
@@ -330,21 +329,21 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	private SStructure mapGroup2SStructure(Group group) {
 		SStructure sStructure = null;
 		if (group != null) {
-			sStructure = SaltFactory.eINSTANCE.createSStructure();
-			sStructure.setSName(group.getId());
+			sStructure = SaltFactory.createSStructure();
+			sStructure.setName(group.getId());
 			if (group.getType() != null)
-				sStructure.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), group.getType());
+				sStructure.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), group.getType());
 
 			// puts segment.id and mapped SSTructure-object into table
 			this.rstId2SStructure.put(group.getId(), sStructure);
 
 			{// create SAnnotation containing the group as value
-				SAnnotation sAnno = SaltFactory.eINSTANCE.createSAnnotation();
-				sAnno.setSName(((RSTImporterProperties) this.getProperties()).getNodeKindName());
-				sAnno.setSValue(NODE_KIND_GROUP);
-				sStructure.addSAnnotation(sAnno);
+				SAnnotation sAnno = SaltFactory.createSAnnotation();
+				sAnno.setName(((RSTImporterProperties) this.getProperties()).getNodeKindName());
+				sAnno.setValue(NODE_KIND_GROUP);
+				sStructure.addAnnotation(sAnno);
 			}// create SAnnotation containing the group as value
-			this.getSDocument().getSDocumentGraph().addSNode(sStructure);
+			this.getDocument().getDocumentGraph().addNode(sStructure);
 		}
 		return (sStructure);
 	}
@@ -369,15 +368,15 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			if (sTarget == null)
 				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the parent of a relation belongs to a non existing node with id '" + relation.getParent().getId() + "'.");
 
-			SDominanceRelation sDomRel = SaltFactory.eINSTANCE.createSDominanceRelation();
+			SDominanceRelation sDomRel = SaltFactory.createSDominanceRelation();
 			if (relation.getType() != null)
-				sDomRel.addSType(relation.getType());
-			sDomRel.setSSource(sSource);
-			sDomRel.setSTarget(sTarget);
-			this.getSDocument().getSDocumentGraph().addSRelation(sDomRel);
+				sDomRel.setType(relation.getType());
+			sDomRel.setSource(sSource);
+			sDomRel.setTarget(sTarget);
+			this.getDocument().getDocumentGraph().addRelation(sDomRel);
 
 			if (relation.getName() != null)
-				sDomRel.createSAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), relation.getName());
+				sDomRel.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), relation.getName());
 		}
 	}
 }

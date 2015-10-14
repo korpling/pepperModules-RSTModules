@@ -17,13 +17,13 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperties;
-import de.hu_berlin.german.korpling.saltnpepper.pepper.modules.PepperModuleProperty;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
+import org.corpus_tools.pepper.modules.PepperModuleProperties;
+import org.corpus_tools.pepper.modules.PepperModuleProperty;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.core.SAnnotation;
+
 
 /**
  * Defines the properties to be used for the {@link RSTImporter}.
@@ -31,12 +31,9 @@ import de.hu_berlin.german.korpling.saltnpepper.salt.saltCore.SAnnotation;
  * @author Florian Zipser
  *
  */
+@SuppressWarnings("serial")
 public class RSTImporterProperties extends PepperModuleProperties {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
+	
 	public static final String PREFIX = "rstImporter.";
 
 	/**

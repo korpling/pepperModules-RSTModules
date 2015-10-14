@@ -17,11 +17,24 @@
  */
 package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
 
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.corpus_tools.salt.SALT_TYPE;
+import org.corpus_tools.salt.SaltFactory;
+import org.corpus_tools.salt.common.SDocumentGraph;
+import org.corpus_tools.salt.common.SDominanceRelation;
+import org.corpus_tools.salt.common.SStructure;
+import org.corpus_tools.salt.common.STextualDS;
+import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.core.SRelation;
+import org.corpus_tools.salt.util.DataSourceSequence;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import de.hu_berlin.german.korpling.rst.Group;
 import de.hu_berlin.german.korpling.rst.RSTDocument;
@@ -29,14 +42,6 @@ import de.hu_berlin.german.korpling.rst.RSTFactory;
 import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RST2SaltMapper;
 import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
-import de.hu_berlin.german.korpling.saltnpepper.salt.SaltFactory;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDataSourceSequence;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDocumentGraph;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SDominanceRelation;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SStructure;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STYPE_NAME;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.STextualDS;
-import de.hu_berlin.german.korpling.saltnpepper.salt.saltCommon.sDocumentStructure.SToken;
 
 public class RST2SaltMapperTest {
 
@@ -53,9 +58,9 @@ public class RST2SaltMapperTest {
 	@Before
 	public void setUp() {
 		this.setFixture(new RST2SaltMapper());
-		this.getFixture().setSDocument(SaltFactory.eINSTANCE.createSDocument());
-		this.getFixture().setCurrentRSTDocument(RSTFactory.eINSTANCE.createRSTDocument());
-		this.getFixture().setProperties(new RSTImporterProperties());
+		getFixture().setDocument(SaltFactory.createSDocument());
+		getFixture().setCurrentRSTDocument(RSTFactory.eINSTANCE.createRSTDocument());
+		getFixture().setProperties(new RSTImporterProperties());
 	}
 
 	private String[] text = { "Is", "this", "example", "more", "complicated", "than", "it", "is", "supposed", "to", "be", "?" };
@@ -63,27 +68,27 @@ public class RST2SaltMapperTest {
 	private String text2 = "more complicated than it is supposed to be?";
 
 	private RSTDocument addSegments(RSTDocument rstDocument) {
-		EList<Segment> segments = new BasicEList<Segment>();
+		List<Segment> segments = new ArrayList<Segment>();
 		Segment seg1 = RSTFactory.eINSTANCE.createSegment();
 		seg1.setText(text1);
 		seg1.setId("seg1");
 		seg1.setType("multinuc");
 		segments.add(seg1);
-		this.getFixture().getCurrentRSTDocument().getSegments().add(seg1);
+		getFixture().getCurrentRSTDocument().getSegments().add(seg1);
 
 		Segment seg2 = RSTFactory.eINSTANCE.createSegment();
 		seg2.setText(text2);
 		seg2.setId("seg2");
 		seg2.setType("rst");
 		segments.add(seg2);
-		this.getFixture().getCurrentRSTDocument().getSegments().add(seg2);
+		getFixture().getCurrentRSTDocument().getSegments().add(seg2);
 
 		return (rstDocument);
 	}
 
 	public SStructure getSStructureByName(String sName) {
-		for (SStructure sStruct : this.getFixture().getSDocument().getSDocumentGraph().getSStructures()) {
-			if (sStruct.getSName().equals(sName))
+		for (SStructure sStruct : getFixture().getDocument().getDocumentGraph().getStructures()) {
+			if (sStruct.getName().equals(sName))
 				return (sStruct);
 		}
 		return (null);
@@ -94,49 +99,49 @@ public class RST2SaltMapperTest {
 	 */
 	@Test
 	public void testMapSegmentsWithTokenize() {
-		addSegments(this.getFixture().getCurrentRSTDocument());
+		addSegments(getFixture().getCurrentRSTDocument());
 
-		this.getFixture().mapSDocument(getFixture().getCurrentRSTDocument());
-		SDocumentGraph sDocGraph = this.getFixture().getSDocument().getSDocumentGraph();
+		getFixture().mapSDocument(getFixture().getCurrentRSTDocument());
+		SDocumentGraph sDocGraph = getFixture().getDocument().getDocumentGraph();
 
 		// STextualDS
-		assertNotNull(sDocGraph.getSTextualDSs());
-		assertEquals(1, sDocGraph.getSTextualDSs().size());
-		assertNotNull(sDocGraph.getSTextualDSs().get(0));
-		assertEquals(text1 + " " + text2, sDocGraph.getSTextualDSs().get(0).getSText());
+		assertNotNull(sDocGraph.getTextualDSs());
+		assertEquals(1, sDocGraph.getTextualDSs().size());
+		assertNotNull(sDocGraph.getTextualDSs().get(0));
+		assertEquals(text1 + " " + text2, sDocGraph.getTextualDSs().get(0).getText());
 
 		// SToken
-		assertNotNull(sDocGraph.getSTokens());
-		assertEquals(12, sDocGraph.getSTokens().size());
+		assertNotNull(sDocGraph.getTokens());
+		assertEquals(12, sDocGraph.getTokens().size());
 		int i = 0;
-		for (SToken sToken : sDocGraph.getSTokens()) {
+		for (SToken sToken : sDocGraph.getTokens()) {
 			assertNotNull(sToken);
-			EList<STYPE_NAME> relTypes = new BasicEList<STYPE_NAME>();
-			relTypes.add(STYPE_NAME.STEXT_OVERLAPPING_RELATION);
-			SDataSourceSequence sequence = sDocGraph.getOverlappedDSSequences(sToken, relTypes).get(0);
-			assertEquals(text[i], ((STextualDS) sequence.getSSequentialDS()).getSText().substring(sequence.getSStart(), sequence.getSEnd()));
+			List<SALT_TYPE> relTypes = new ArrayList<SALT_TYPE>();
+			relTypes.add(SALT_TYPE.STEXT_OVERLAPPING_RELATION);
+			DataSourceSequence sequence = sDocGraph.getOverlappedDataSourceSequence(sToken, relTypes).get(0);
+			assertEquals(text[i], ((STextualDS) sequence.getDataSource()).getText().substring((Integer)sequence.getStart(), (Integer)sequence.getEnd()));
 			i++;
 		}
 
 		// SStructure
-		assertNotNull(sDocGraph.getSStructures());
-		assertEquals(2, sDocGraph.getSStructures().size());
+		assertNotNull(sDocGraph.getStructures());
+		assertEquals(2, sDocGraph.getStructures().size());
 
 		SStructure struct1 = this.getSStructureByName("seg1");
 		assertNotNull(struct1);
-		assertEquals(2, struct1.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct1.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
-		assertEquals("multinuc", struct1.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getSValue());
+		assertEquals(2, struct1.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct1.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
+		assertEquals("multinuc", struct1.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getValue());
 
 		SStructure struct2 = this.getSStructureByName("seg2");
 		assertNotNull(struct2);
-		assertEquals(2, struct2.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct2.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
-		assertEquals("rst", struct2.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getSValue());
+		assertEquals(2, struct2.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct2.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
+		assertEquals("rst", struct2.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getValue());
 
 		// SDominanceRelation
-		assertNotNull(sDocGraph.getSDominanceRelations());
-		assertEquals(12, sDocGraph.getSDominanceRelations().size());
+		assertNotNull(sDocGraph.getDominanceRelations());
+		assertEquals(12, sDocGraph.getDominanceRelations().size());
 	}
 
 	/**
@@ -151,105 +156,105 @@ public class RST2SaltMapperTest {
 		Group group1 = RSTFactory.eINSTANCE.createGroup();
 		group1.setType("span");
 		group1.setId("grp1");
-		this.getFixture().getCurrentRSTDocument().getGroups().add(group1);
+		getFixture().getCurrentRSTDocument().getGroups().add(group1);
 
 		Group group2 = RSTFactory.eINSTANCE.createGroup();
 		group2.setType("multinuc");
 		group2.setId("grp2");
-		this.getFixture().getCurrentRSTDocument().getGroups().add(group2);
+		getFixture().getCurrentRSTDocument().getGroups().add(group2);
 
-		this.getFixture().getCurrentRSTDocument().createRelation(group1, group2, "span", null);
+		getFixture().getCurrentRSTDocument().createRelation(group1, group2, "span", null);
 
-		EList<Segment> segments = new BasicEList<Segment>();
+		List<Segment> segments = new ArrayList<Segment>();
 		Segment seg1 = RSTFactory.eINSTANCE.createSegment();
 		seg1.setText(text1);
 		seg1.setId("seg1");
 		segments.add(seg1);
-		this.getFixture().getCurrentRSTDocument().getSegments().add(seg1);
+		getFixture().getCurrentRSTDocument().getSegments().add(seg1);
 
-		this.getFixture().getCurrentRSTDocument().createRelation(group2, seg1, "conjunction", "multinuc");
+		getFixture().getCurrentRSTDocument().createRelation(group2, seg1, "conjunction", "multinuc");
 
 		Segment seg2 = RSTFactory.eINSTANCE.createSegment();
 		seg2.setText(text2);
 		seg2.setId("seg2");
 		segments.add(seg2);
-		this.getFixture().getCurrentRSTDocument().getSegments().add(seg2);
+		getFixture().getCurrentRSTDocument().getSegments().add(seg2);
 
-		this.getFixture().getCurrentRSTDocument().createRelation(group2, seg2, "conjunction", "multinuc");
+		getFixture().getCurrentRSTDocument().createRelation(group2, seg2, "conjunction", "multinuc");
 
 		Segment seg3 = RSTFactory.eINSTANCE.createSegment();
 		seg3.setText(text3);
 		seg3.setId("seg3");
 		segments.add(seg3);
-		this.getFixture().getCurrentRSTDocument().getSegments().add(seg3);
+		getFixture().getCurrentRSTDocument().getSegments().add(seg3);
 
-		this.getFixture().getCurrentRSTDocument().createRelation(group2, seg3, "nonvolitional-result", "rst");
+		getFixture().getCurrentRSTDocument().createRelation(group2, seg3, "nonvolitional-result", "rst");
 
-		this.getFixture().mapSDocument(getFixture().getCurrentRSTDocument());
-		SDocumentGraph sDocGraph = this.getFixture().getSDocument().getSDocumentGraph();
+		getFixture().mapSDocument(getFixture().getCurrentRSTDocument());
+		SDocumentGraph sDocGraph = getFixture().getDocument().getDocumentGraph();
 
 		// STextualDS
-		assertNotNull(sDocGraph.getSTextualDSs());
-		assertEquals(1, sDocGraph.getSTextualDSs().size());
-		assertNotNull(sDocGraph.getSTextualDSs().get(0));
+		assertNotNull(sDocGraph.getTextualDSs());
+		assertEquals(1, sDocGraph.getTextualDSs().size());
+		assertNotNull(sDocGraph.getTextualDSs().get(0));
 
 		// SToken
-		assertNotNull(sDocGraph.getSTokens());
-		assertEquals(18, sDocGraph.getSTokens().size());
+		assertNotNull(sDocGraph.getTokens());
+		assertEquals(18, sDocGraph.getTokens().size());
 
 		// SStructure
-		assertNotNull(sDocGraph.getSStructures());
-		assertEquals(5, sDocGraph.getSStructures().size());
+		assertNotNull(sDocGraph.getStructures());
+		assertEquals(5, sDocGraph.getStructures().size());
 
 		SStructure grp1 = this.getSStructureByName("grp1");
 		assertNotNull(grp1);
-		assertEquals(2, grp1.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_GROUP, grp1.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
-		assertEquals("span", grp1.getSAnnotation(((RSTImporterProperties) this.getFixture().getProperties()).getNodeTypeName()).getSValue());
+		assertEquals(2, grp1.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_GROUP, grp1.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
+		assertEquals("span", grp1.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getValue());
 
 		SStructure grp2 = this.getSStructureByName("grp2");
 		assertNotNull(grp2);
-		assertEquals(2, grp2.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_GROUP, grp2.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
-		assertEquals("multinuc", grp2.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getSValue());
+		assertEquals(2, grp2.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_GROUP, grp2.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
+		assertEquals("multinuc", grp2.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeTypeName()).getValue());
 
 		SStructure struct1 = this.getSStructureByName("seg1");
 		assertNotNull(struct1);
-		assertEquals(1, struct1.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct1.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
+		assertEquals(1, struct1.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct1.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
 
 		SStructure struct2 = this.getSStructureByName("seg2");
 		assertNotNull(struct2);
-		assertEquals(1, struct2.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct2.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
+		assertEquals(1, struct2.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct2.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
 
 		SStructure struct3 = this.getSStructureByName("seg3");
 		assertNotNull(struct3);
-		assertEquals(1, struct3.getSAnnotations().size());
-		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct3.getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getSValue());
+		assertEquals(1, struct3.getAnnotations().size());
+		assertEquals(RST2SaltMapper.NODE_KIND_SEGMENT, struct3.getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getNodeKindName()).getValue());
 
 		// SDominanceRelation
-		assertNotNull(sDocGraph.getSDominanceRelations());
-		assertEquals(22, sDocGraph.getSDominanceRelations().size());
+		assertNotNull(sDocGraph.getDominanceRelations());
+		assertEquals(22, sDocGraph.getDominanceRelations().size());
 
-		assertEquals(1, sDocGraph.getEdges(grp1.getSId(), grp2.getSId()).size());
-		assertTrue(sDocGraph.getEdges(grp1.getSId(), grp2.getSId()).get(0) instanceof SDominanceRelation);
-		assertEquals("span", ((SDominanceRelation) sDocGraph.getEdges(grp1.getSId(), grp2.getSId()).get(0)).getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getSValue());
+		assertEquals(1, sDocGraph.getRelations(grp1.getId(), grp2.getId()).size());
+		assertTrue((SRelation) sDocGraph.getRelations(grp1.getId(), grp2.getId()).get(0) instanceof SDominanceRelation);
+		assertEquals("span", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp1.getId(), grp2.getId()).get(0)).getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getValue());
 
-		assertEquals(1, sDocGraph.getEdges(grp2.getSId(), struct1.getSId()).size());
-		assertTrue(sDocGraph.getEdges(grp2.getSId(), struct1.getSId()).get(0) instanceof SDominanceRelation);
-		assertEquals("multinuc", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct1.getSId()).get(0)).getSTypes().get(0));
-		assertEquals("conjunction", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct1.getSId()).get(0)).getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getSValue());
+		assertEquals(1, sDocGraph.getRelations(grp2.getId(), struct1.getId()).size());
+		assertTrue((SRelation) sDocGraph.getRelations(grp2.getId(), struct1.getId()).get(0) instanceof SDominanceRelation);
+		assertEquals("multinuc", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct1.getId()).get(0)).getType());
+		assertEquals("conjunction", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct1.getId()).get(0)).getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getValue());
 
-		assertEquals(1, sDocGraph.getEdges(grp2.getSId(), struct2.getSId()).size());
-		assertTrue(sDocGraph.getEdges(grp2.getSId(), struct2.getSId()).get(0) instanceof SDominanceRelation);
-		assertEquals("multinuc", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct2.getSId()).get(0)).getSTypes().get(0));
-		assertEquals("conjunction", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct2.getSId()).get(0)).getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getSValue());
+		assertEquals(1, sDocGraph.getRelations(grp2.getId(), struct2.getId()).size());
+		assertTrue((SRelation) sDocGraph.getRelations(grp2.getId(), struct2.getId()).get(0) instanceof SDominanceRelation);
+		assertEquals("multinuc", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct2.getId()).get(0)).getType());
+		assertEquals("conjunction", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct2.getId()).get(0)).getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getValue());
 
-		assertEquals(1, sDocGraph.getEdges(grp2.getSId(), struct3.getSId()).size());
-		assertTrue(sDocGraph.getEdges(grp2.getSId(), struct3.getSId()).get(0) instanceof SDominanceRelation);
-		assertEquals("rst", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct3.getSId()).get(0)).getSTypes().get(0));
-		assertEquals("nonvolitional-result", ((SDominanceRelation) sDocGraph.getEdges(grp2.getSId(), struct3.getSId()).get(0)).getSAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getSValue());
+		assertEquals(1, sDocGraph.getRelations(grp2.getId(), struct3.getId()).size());
+		assertTrue((SRelation) sDocGraph.getRelations(grp2.getId(), struct3.getId()).get(0) instanceof SDominanceRelation);
+		assertEquals("rst", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct3.getId()).get(0)).getType());
+		assertEquals("nonvolitional-result", ((SDominanceRelation) (SRelation) sDocGraph.getRelations(grp2.getId(), struct3.getId()).get(0)).getAnnotation(((RSTImporterProperties) getFixture().getProperties()).getRelationName()).getValue());
 
 	}
 }
