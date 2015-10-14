@@ -15,7 +15,7 @@
  *
  *
  */
-package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules;
+package org.corpus_tools.peppermodules.rstModules;
 
 import java.io.IOException;
 import java.util.Hashtable;

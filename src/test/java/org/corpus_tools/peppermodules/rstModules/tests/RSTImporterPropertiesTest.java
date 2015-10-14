@@ -15,17 +15,16 @@
  *
  *
  */
-package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
+package org.corpus_tools.peppermodules.rstModules.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
+import org.corpus_tools.peppermodules.rstModules.RSTImporterProperties;
 import org.junit.Before;
 import org.junit.Test;
-
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporterProperties;
 
 public class RSTImporterPropertiesTest {
 

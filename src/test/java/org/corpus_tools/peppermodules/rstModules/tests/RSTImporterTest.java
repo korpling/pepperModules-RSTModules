@@ -15,16 +15,15 @@
  *
  *
  */
-package de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.tests;
+package org.corpus_tools.peppermodules.rstModules.tests;
 
 import java.io.File;
 
 import org.corpus_tools.pepper.common.FormatDesc;
 import org.corpus_tools.pepper.testFramework.PepperImporterTest;
+import org.corpus_tools.peppermodules.rstModules.RSTImporter;
 import org.eclipse.emf.common.util.URI;
 import org.junit.Before;
-
-import de.hu_berlin.german.korpling.saltnpepper.pepperModules.rstModules.RSTImporter;
 
 
 public class RSTImporterTest extends PepperImporterTest {
