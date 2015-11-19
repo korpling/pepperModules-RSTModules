@@ -116,9 +116,7 @@ public class RST2SaltMapperTest {
 		int i = 0;
 		for (SToken sToken : sDocGraph.getTokens()) {
 			assertNotNull(sToken);
-			List<SALT_TYPE> relTypes = new ArrayList<SALT_TYPE>();
-			relTypes.add(SALT_TYPE.STEXT_OVERLAPPING_RELATION);
-			DataSourceSequence sequence = sDocGraph.getOverlappedDataSourceSequence(sToken, relTypes).get(0);
+			DataSourceSequence sequence = sDocGraph.getOverlappedDataSourceSequence(sToken, SALT_TYPE.STEXT_OVERLAPPING_RELATION).get(0);
 			assertEquals(text[i], ((STextualDS) sequence.getDataSource()).getText().substring((Integer)sequence.getStart(), (Integer)sequence.getEnd()));
 			i++;
 		}
