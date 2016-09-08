@@ -236,8 +236,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
 					tokenizer.setDocumentGraph(getDocument().getDocumentGraph());
-					Character[] seps= (Character[])((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray();
-					tokenizer.tokenize(sText, seps);
+					Character[] seps= ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray(new Character[((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().size()]);
+					tokenizer.tokenize(sText, start, end, seps);
+                                        tokens = getDocument().getDocumentGraph().getTokens();
 				}else{
 					Tokenizer tokenizer = this.getDocument().getDocumentGraph().createTokenizer();
 					tokens = tokenizer.tokenize(sText, null, start, end);
