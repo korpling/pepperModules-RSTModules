@@ -45,6 +45,7 @@ import de.hu_berlin.german.korpling.rst.RSTDocument;
 import de.hu_berlin.german.korpling.rst.Relation;
 import de.hu_berlin.german.korpling.rst.Segment;
 import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -217,6 +218,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 */
 	public void mapSegmentsWithTokenize(List<Segment> segments) {
 		STextualDS sText = null;
+                int seenTokens = 0;
+                Character[] seps = null;
+                if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
+                    seps = ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray(new Character[((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().size()]);
+                }
 		if ((segments != null) && (segments.size() > 0)) {
 			sText = SaltFactory.createSTextualDS();
 			this.getDocument().getDocumentGraph().addNode(sText);
@@ -232,16 +238,19 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				} else
 					sText.setText(segment.getText());
 				int end = sText.getText().length();
-				
+                                
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
+                                        seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1; // get 0 based index of last seen token
+                                        if (seenTokens < 0){ seenTokens = 0;} // handle first segment, when getTokens().size() is 0
 					tokenizer.setDocumentGraph(getDocument().getDocumentGraph());
-					Character[] seps= ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray(new Character[((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().size()]);
-					tokenizer.tokenize(sText, start, end, seps);
-                                        tokens = getDocument().getDocumentGraph().getTokens();
+					tokenizer.tokenize(sText, start, end, seps);  // note that the SimpleTokenizer does not return tokens, but alters the document graph with new tokens
+                                        // collect the new tokens as a sublist from the document's current graph
+                                        tokens = getDocument().getDocumentGraph().getTokens().subList(seenTokens, getDocument().getDocumentGraph().getTokens().size()-1);
+
 				}else{
 					Tokenizer tokenizer = this.getDocument().getDocumentGraph().createTokenizer();
-					tokens = tokenizer.tokenize(sText, null, start, end);
+					tokens = tokenizer.tokenize(sText, null, start, end); // the normal Tokenizer actually returns the tokens
 				}
 				if ((tokens != null) && (tokens.size() > 0)) {// if tokens exist
 					SStructure sStruct = SaltFactory.createSStructure();
