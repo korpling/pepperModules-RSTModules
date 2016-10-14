@@ -241,12 +241,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
                                 
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
-                                        seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1; // get 0 based index of last seen token
-                                        if (seenTokens < 0){ seenTokens = 0;} // handle first segment, when getTokens().size() is 0
+                                        seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1; // get 0 based index of last seen token; -1 if this is the very first token
 					tokenizer.setDocumentGraph(getDocument().getDocumentGraph());
 					tokenizer.tokenize(sText, start, end, seps);  // note that the SimpleTokenizer does not return tokens, but alters the document graph with new tokens
                                         // collect the new tokens as a sublist from the document's current graph
-                                        tokens = getDocument().getDocumentGraph().getTokens().subList(seenTokens, getDocument().getDocumentGraph().getTokens().size()-1);
+                                        tokens = getDocument().getDocumentGraph().getTokens().subList(seenTokens+1, getDocument().getDocumentGraph().getTokens().size());
 
 				}else{
 					Tokenizer tokenizer = this.getDocument().getDocumentGraph().createTokenizer();
