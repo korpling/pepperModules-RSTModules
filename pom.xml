@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>org.corpus-tools</groupId>
 			<artifactId>rst-emf-api</artifactId>
-			<version>[0.0.2,)</version>
+			<version>[1.0,)</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
