@@ -22,16 +22,10 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.Vector;
 
+import org.corpus_tools.peppermodules.rstModules.models.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.DefaultHandler2;
-
-import org.corpus_tools.peppermodules.rstModules.models.RSTException;
-import org.corpus_tools.peppermodules.rstModules.models.AbstractNode;
-import org.corpus_tools.peppermodules.rstModules.models.Group;
-import org.corpus_tools.peppermodules.rstModules.models.RSTDocument;
-import org.corpus_tools.peppermodules.rstModules.models.Relation;
-import org.corpus_tools.peppermodules.rstModules.models.Segment;
 
 public class RSTReader extends DefaultHandler2 {
     public RSTReader() {
@@ -84,7 +78,7 @@ public class RSTReader extends DefaultHandler2 {
      * XML-element types for RST
      */
     public enum RSTElements {
-        RST, HEADER, ENCODING, RELATIONS, REL, BODY, SEGMENT, GROUP
+        RST, HEADER, ENCODING, RELATIONS, REL, BODY, SEGMENT, GROUP, SIGNALS, SIGNAL
     };
 
     /**
@@ -275,6 +269,22 @@ public class RSTReader extends DefaultHandler2 {
                 }
             } // creating relation
         }
+
+        else if (qName.equals(RSTVocabulary.TAG_SIGNALS)) {
+            this.rstElementStack.push(RSTElements.SIGNALS);
+        }
+
+        else if (qName.equals(RSTVocabulary.TAG_SIGNAL)) {
+            this.rstElementStack.push(RSTElements.GROUP);
+            Signal signal = new Signal();
+            signal.setType(attributes.getValue(RSTVocabulary.ATT_TYPE));
+            signal.setSubtype(attributes.getValue(RSTVocabulary.ATT_SUBTYPE));
+            signal.setTokens(attributes.getValue(RSTVocabulary.ATT_TOKENS));
+
+            AbstractNode sourceNode = this.idAbstractNodeTable.get(attributes.getValue(RSTVocabulary.ATT_SOURCE));
+            signal.setSource(sourceNode);
+            this.getRSTDocument().getSignals().add(signal);
+        }
     }
 
     /**
@@ -315,10 +325,15 @@ abstract class RSTVocabulary {
     public static final String TAG_BODY = "body";
     public static final String TAG_SEGMENT = "segment";
     public static final String TAG_GROUP = "group";
+    public static final String TAG_SIGNALS = "signals";
+    public static final String TAG_SIGNAL = "signal";
 
     public static final String ATT_NAME = "name";
     public static final String ATT_PARENT = "parent";
     public static final String ATT_TYPE = "type";
+    public static final String ATT_SUBTYPE = "subtype";
     public static final String ATT_ID = "id";
     public static final String ATT_RELNAME = "relname";
+    public static final String ATT_SOURCE = "subtype";
+    public static final String ATT_TOKENS = "tokens";
 }
