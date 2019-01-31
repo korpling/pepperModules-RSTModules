@@ -36,16 +36,11 @@ import org.corpus_tools.salt.common.SToken;
 import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import org.corpus_tools.peppermodules.rstModules.models.Group;
 import org.corpus_tools.peppermodules.rstModules.models.RSTDocument;
 import org.corpus_tools.peppermodules.rstModules.models.Relation;
 import org.corpus_tools.peppermodules.rstModules.models.Segment;
-import org.corpus_tools.peppermodules.rstModules.models.AbstractNode;
-//import org.corpus_tools.peppermodules.rstModules.models.resources.RSTResourceFactory;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -102,11 +97,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
 		RSTDocument rstDocument;
-		//try {
 		rstDocument = new RSTDocument(this.getResourceURI());
-		//} catch (IOException e) {
-		//	throw new PepperModuleException(this, "Cannot load the RST file: " + this.getResourceURI() + ".", e);
-		//}
 
 		this.mapSDocument(rstDocument);
 

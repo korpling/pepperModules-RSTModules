@@ -24,10 +24,8 @@ import org.corpus_tools.pepper.modules.PepperMapper;
 import org.corpus_tools.salt.graph.Identifier;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.osgi.service.component.annotations.Component;
 
-import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
 
 /**
  * @author Florian Zipser
