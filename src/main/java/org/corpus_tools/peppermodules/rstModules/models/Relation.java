@@ -19,6 +19,10 @@ package org.corpus_tools.peppermodules.rstModules.models;
 
 public class Relation {
     private AbstractNode parent;
+    private AbstractNode child;
+    private String type;
+    private String name;
+
     public AbstractNode getParent() {
         return parent;
     }
@@ -26,7 +30,6 @@ public class Relation {
         parent = n;
     }
 
-    private AbstractNode child;
     public AbstractNode getChild() {
         return child;
     }
@@ -34,7 +37,6 @@ public class Relation {
         child = n;
     }
 
-    private String type;
     public String getType() {
         return type;
     }
@@ -42,7 +44,6 @@ public class Relation {
         type = s;
     }
 
-    private String name;
     public String getName() {
         return name;
     }

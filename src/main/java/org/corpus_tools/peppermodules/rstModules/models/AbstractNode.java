@@ -19,6 +19,8 @@ package org.corpus_tools.peppermodules.rstModules.models;
 
 public abstract class AbstractNode {
     private String type;
+    private String id;
+
     public String getType() {
         return type;
     }
@@ -26,7 +28,6 @@ public abstract class AbstractNode {
         type = s;
     }
 
-    private String id;
     public String getId() {
         return id;
     }

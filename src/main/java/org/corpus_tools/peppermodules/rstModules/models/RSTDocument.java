@@ -36,6 +36,7 @@ public class RSTDocument {
     private List<Segment> segments;
     private List<Group> groups;
     private List<Relation> relations;
+    private List<Signal> signals;
 
     public List<Segment> getSegments() {
         return segments;
@@ -47,6 +48,10 @@ public class RSTDocument {
 
     public List<Relation> getRelations() {
         return relations;
+    }
+
+    public List<Signal> getSignals() {
+        return signals;
     }
 
     public List<Relation> getIncomingRelations(String id) {
@@ -104,6 +109,7 @@ public class RSTDocument {
         segments = new ArrayList<Segment>();
         groups = new ArrayList<Group>();
         relations = new ArrayList<Relation>();
+        signals = new ArrayList<Signal>();
     }
 
     public RSTDocument() {
