@@ -334,6 +334,6 @@ abstract class RSTVocabulary {
     public static final String ATT_SUBTYPE = "subtype";
     public static final String ATT_ID = "id";
     public static final String ATT_RELNAME = "relname";
-    public static final String ATT_SOURCE = "subtype";
+    public static final String ATT_SOURCE = "source";
     public static final String ATT_TOKENS = "tokens";
 }
