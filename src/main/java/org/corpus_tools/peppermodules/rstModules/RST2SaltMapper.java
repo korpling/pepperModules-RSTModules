@@ -40,12 +40,12 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
-import de.hu_berlin.german.korpling.rst.Group;
-import de.hu_berlin.german.korpling.rst.RSTDocument;
-import de.hu_berlin.german.korpling.rst.Relation;
-import de.hu_berlin.german.korpling.rst.Segment;
-import de.hu_berlin.german.korpling.rst.resources.RSTResourceFactory;
-import org.apache.commons.lang3.StringUtils;
+import org.corpus_tools.peppermodules.rstModules.models.Group;
+import org.corpus_tools.peppermodules.rstModules.models.RSTDocument;
+import org.corpus_tools.peppermodules.rstModules.models.Relation;
+import org.corpus_tools.peppermodules.rstModules.models.Segment;
+import org.corpus_tools.peppermodules.rstModules.models.AbstractNode;
+//import org.corpus_tools.peppermodules.rstModules.models.resources.RSTResourceFactory;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -82,37 +82,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.rstId2SStructure = new Hashtable<String, SStructure>();
 	}
 
-	/** {@link ResourceSet} for loading EMF models **/
-	private ResourceSet resourceSet = null;
-
-	/** Sets {@link ResourceSet} for loading EMF models **/
-	public void setResourceSet(ResourceSet resourceSet) {
-		this.resourceSet = resourceSet;
-	}
-
-	/** Returns {@link ResourceSet} for loading EMF models **/
-	public ResourceSet getResourceSet() {
-		// Register XML resource factory
-		if (resourceSet == null) {
-			resourceSet = new ResourceSetImpl();
-			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(RSTImporter.FILE_ENDING_RS3, new RSTResourceFactory());
-		}
-		return (resourceSet);
-	}
-
 	private RSTDocument currentRSTDocument = null;
 
-	/**
-	 * @param currentSDocument
-	 *            the currentSDocument to set
-	 */
 	public void setCurrentRSTDocument(RSTDocument currentRSTDocument) {
 		this.currentRSTDocument = currentRSTDocument;
 	}
 
-	/**
-	 * @return the currentSDocument
-	 */
 	public RSTDocument getCurrentRSTDocument() {
 		return this.currentRSTDocument;
 	}
@@ -126,18 +101,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 */
 	@Override
 	public DOCUMENT_STATUS mapSDocument() {
-		// load resource
-		Resource resource = this.getResourceSet().createResource(this.getResourceURI());
-
-		if (resource == null)
-			throw new PepperModuleException(this, "Cannot load the RST file: " + this.getResourceURI() + ", becuase the resource is null.");
-		try {
-			resource.load(null);
-		} catch (IOException e) {
-			throw new PepperModuleException(this, "Cannot load the RST file: " + this.getResourceURI() + ".", e);
-		}
-		RSTDocument rstDocument = null;
-		rstDocument = (RSTDocument) resource.getContents().get(0);
+		RSTDocument rstDocument;
+		//try {
+		rstDocument = new RSTDocument(this.getResourceURI());
+		//} catch (IOException e) {
+		//	throw new PepperModuleException(this, "Cannot load the RST file: " + this.getResourceURI() + ".", e);
+		//}
 
 		this.mapSDocument(rstDocument);
 

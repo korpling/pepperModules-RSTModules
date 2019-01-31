@@ -56,20 +56,12 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 	private ResourceSet resourceSet = null;
 
 	/**
-	 * Creates a mapper of type {@link PAULA2SaltMapper}. {@inheritDoc
+	 * Creates a mapper of type {@link RST2SaltMapper}. {@inheritDoc
 	 * PepperModule#createPepperMapper(Identifier)}
 	 */
 	@Override
 	public PepperMapper createPepperMapper(Identifier sElementId) {
 		RST2SaltMapper mapper = new RST2SaltMapper();
-
-		// Register XML resource factory
-		if (resourceSet == null) {
-			resourceSet = new ResourceSetImpl();
-			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(FILE_ENDING_RS3, new RSTResourceFactory());
-		}
-		mapper.setResourceSet(resourceSet);
-
-		return (mapper);
+		return mapper;
 	}
 }
