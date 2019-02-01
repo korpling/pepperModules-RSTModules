@@ -17,7 +17,6 @@
  */
 package org.corpus_tools.peppermodules.rstModules;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -25,22 +24,14 @@ import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
 import org.corpus_tools.pepper.modules.PepperMapper;
 import org.corpus_tools.pepper.modules.exceptions.PepperModuleException;
+import org.corpus_tools.peppermodules.rstModules.models.*;
 import org.corpus_tools.salt.SaltFactory;
-import org.corpus_tools.salt.common.SDocument;
-import org.corpus_tools.salt.common.SDocumentGraph;
-import org.corpus_tools.salt.common.SDominanceRelation;
-import org.corpus_tools.salt.common.SStructure;
-import org.corpus_tools.salt.common.STextualDS;
-import org.corpus_tools.salt.common.STextualRelation;
-import org.corpus_tools.salt.common.SToken;
+import org.corpus_tools.salt.common.*;
 import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
-
-import org.corpus_tools.peppermodules.rstModules.models.Group;
-import org.corpus_tools.peppermodules.rstModules.models.RSTDocument;
-import org.corpus_tools.peppermodules.rstModules.models.Relation;
-import org.corpus_tools.peppermodules.rstModules.models.Segment;
+import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.core.SNode;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -132,6 +123,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		for (Relation relation : this.getCurrentRSTDocument().getRelations()) {
 			this.mapRelation(relation);
 		}
+		// map
+        this.mapSignals();
 	}
 
 	/**
@@ -346,6 +339,69 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 			if (relation.getName() != null)
 				sDomRel.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), relation.getName());
+		}
+	}
+
+	private void mapSignals() {
+		List<Signal> signals = this.getCurrentRSTDocument().getSignals();
+		if (signals != null && signals.size() > 0) {
+			SLayer signalsLayer = SaltFactory.createSLayer();
+			String layerName = ((RSTImporterProperties) this.getProperties()).getSignalsLayerName();
+			signalsLayer.setName(layerName);
+
+			for (Signal signal : this.getCurrentRSTDocument().getSignals()) {
+				this.mapSignal(signal, signalsLayer);
+			}
+
+			this.getDocument().addLayer(signalsLayer);
+		}
+	}
+
+	private void mapSignal(Signal signal, SLayer layer) {
+		if (signal == null) {
+			return;
+		}
+
+		if (signal.getSource() == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+					+ "', because the source of a signal is empty.");
+		}
+
+		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
+		if (sSource == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+					+ "', because the parent of a signal points to a non existing node with id '" + signal.getSource().getId() + "'.");
+		}
+
+		SStructure signalNode = SaltFactory.createSStructure();
+
+		SAnnotation type = SaltFactory.createSAnnotation();
+		type.setName("type");
+		type.setValue(signal.getType());
+		SAnnotation subtype = SaltFactory.createSAnnotation();
+		subtype.setName("subtype");
+		subtype.setValue(signal.getSubtype());
+		signalNode.addAnnotation(type);
+		signalNode.addAnnotation(subtype);
+
+		layer.addNode(signalNode);
+		this.getDocument().getDocumentGraph().addNode(signalNode);
+
+		SDominanceRelation rstNode2signal = SaltFactory.createSDominanceRelation();
+		rstNode2signal.setSource(this.rstId2SStructure.get(signal.getSource()));
+		rstNode2signal.setTarget(signalNode);
+		layer.addRelation(rstNode2signal);
+
+		List<Integer> tokenIds = signal.getTokenIds();
+		if (tokenIds != null) {
+			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
+			for (int tokenId : signal.getTokenIds()) {
+				SDominanceRelation signal2token = SaltFactory.createSDominanceRelation();
+				signal2token.setSource(signalNode);
+				// tokens are 1-indexed, list is 0-indexed
+				signal2token.setTarget(sTokens.get(tokenId - 1));
+				layer.addRelation(signal2token);
+			}
 		}
 	}
 }

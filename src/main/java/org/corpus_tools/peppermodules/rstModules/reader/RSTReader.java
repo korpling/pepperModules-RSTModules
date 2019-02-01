@@ -18,9 +18,7 @@
 package org.corpus_tools.peppermodules.rstModules.reader;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
 
 import org.corpus_tools.peppermodules.rstModules.models.*;
 import org.xml.sax.Attributes;
@@ -279,7 +277,17 @@ public class RSTReader extends DefaultHandler2 {
             Signal signal = new Signal();
             signal.setType(attributes.getValue(RSTVocabulary.ATT_TYPE));
             signal.setSubtype(attributes.getValue(RSTVocabulary.ATT_SUBTYPE));
-            signal.setTokens(attributes.getValue(RSTVocabulary.ATT_TOKENS));
+
+            // tokens are integers separated by commas
+            List<Integer> tokenIds = new ArrayList<Integer>();
+
+            String ids = attributes.getValue(RSTVocabulary.ATT_TOKENS);
+            if (ids.length() > 0) {
+                for (String tokenId: ids.split(",")) {
+                    tokenIds.add(Integer.parseInt(tokenId));
+                }
+                signal.setTokenIds(tokenIds);
+            }
 
             AbstractNode sourceNode = this.idAbstractNodeTable.get(attributes.getValue(RSTVocabulary.ATT_SOURCE));
             signal.setSource(sourceNode);

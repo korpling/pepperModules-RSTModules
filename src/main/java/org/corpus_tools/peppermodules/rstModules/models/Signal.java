@@ -17,11 +17,13 @@
  */
 package org.corpus_tools.peppermodules.rstModules.models;
 
+import java.util.List;
+
 public class Signal {
     private String type;
     private String subtype;
     private AbstractNode source;
-    private String tokens;
+    private List<Integer> tokenIds;
 
     public String getType() {
         return type;
@@ -44,11 +46,11 @@ public class Signal {
         source = n;
     }
 
-    public String getTokens() {
-        return tokens;
+    public List<Integer> getTokenIds() {
+        return tokenIds;
     }
-    public void setTokens(String s) {
-        tokens = s;
+    public void setTokenIds(List<Integer> l) {
+        tokenIds = l;
     }
 }
 
