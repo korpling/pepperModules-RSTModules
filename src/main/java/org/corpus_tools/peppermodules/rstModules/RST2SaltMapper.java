@@ -31,7 +31,6 @@ import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
-import org.corpus_tools.salt.core.SNode;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -49,7 +48,7 @@ import org.corpus_tools.salt.core.SNode;
  * 
  * </ul>
  * 
- * @author Florian Zipser
+ * @author Florian Zipser, Luke Gessler
  * 
  */
 public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
@@ -370,16 +369,17 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
 		if (sSource == null) {
 			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
-					+ "', because the parent of a signal points to a non existing node with id '" + signal.getSource().getId() + "'.");
+					+ "', because the parent of a signal points to a non existing node with id '"
+					+ signal.getSource().getId() + "'.");
 		}
 
 		SStructure signalNode = SaltFactory.createSStructure();
 
 		SAnnotation type = SaltFactory.createSAnnotation();
-		type.setName("type");
+		type.setName("signal_type");
 		type.setValue(signal.getType());
 		SAnnotation subtype = SaltFactory.createSAnnotation();
-		subtype.setName("subtype");
+		subtype.setName("signal_subtype");
 		subtype.setValue(signal.getSubtype());
 		signalNode.addAnnotation(type);
 		signalNode.addAnnotation(subtype);
@@ -387,10 +387,10 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		layer.addNode(signalNode);
 		this.getDocument().getDocumentGraph().addNode(signalNode);
 
-		SDominanceRelation rstNode2signal = SaltFactory.createSDominanceRelation();
-		rstNode2signal.setSource(this.rstId2SStructure.get(signal.getSource()));
-		rstNode2signal.setTarget(signalNode);
-		layer.addRelation(rstNode2signal);
+		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
+		signal2rstNode.setSource(signalNode);
+		signal2rstNode.setTarget(this.rstId2SStructure.get(signal.getSource()));
+		layer.addRelation(signal2rstNode);
 
 		List<Integer> tokenIds = signal.getTokenIds();
 		if (tokenIds != null) {
