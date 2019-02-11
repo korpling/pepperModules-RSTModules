@@ -38,10 +38,10 @@ import org.corpus_tools.salt.util.DataSourceSequence;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.hu_berlin.german.korpling.rst.Group;
-import de.hu_berlin.german.korpling.rst.RSTDocument;
-import de.hu_berlin.german.korpling.rst.RSTFactory;
-import de.hu_berlin.german.korpling.rst.Segment;
+
+import org.corpus_tools.peppermodules.rstModules.models.Group;
+import org.corpus_tools.peppermodules.rstModules.models.RSTDocument;
+import org.corpus_tools.peppermodules.rstModules.models.Segment;
 
 public class RST2SaltMapperTest {
 
@@ -59,7 +59,7 @@ public class RST2SaltMapperTest {
 	public void setUp() {
 		this.setFixture(new RST2SaltMapper());
 		getFixture().setDocument(SaltFactory.createSDocument());
-		getFixture().setCurrentRSTDocument(RSTFactory.eINSTANCE.createRSTDocument());
+		getFixture().setCurrentRSTDocument(new RSTDocument());
 		getFixture().setProperties(new RSTImporterProperties());
 	}
 
@@ -69,14 +69,14 @@ public class RST2SaltMapperTest {
 
 	private RSTDocument addSegments(RSTDocument rstDocument) {
 		List<Segment> segments = new ArrayList<Segment>();
-		Segment seg1 = RSTFactory.eINSTANCE.createSegment();
+		Segment seg1 = new Segment();
 		seg1.setText(text1);
 		seg1.setId("seg1");
 		seg1.setType("multinuc");
 		segments.add(seg1);
 		getFixture().getCurrentRSTDocument().getSegments().add(seg1);
 
-		Segment seg2 = RSTFactory.eINSTANCE.createSegment();
+		Segment seg2 = new Segment();
 		seg2.setText(text2);
 		seg2.setId("seg2");
 		seg2.setType("rst");
@@ -151,12 +151,12 @@ public class RST2SaltMapperTest {
 		String text2 = "and John went to Yale.";
 		String text3 = "Therefore, both attended good schools.";
 
-		Group group1 = RSTFactory.eINSTANCE.createGroup();
+		Group group1 = new Group();
 		group1.setType("span");
 		group1.setId("grp1");
 		getFixture().getCurrentRSTDocument().getGroups().add(group1);
 
-		Group group2 = RSTFactory.eINSTANCE.createGroup();
+		Group group2 = new Group();
 		group2.setType("multinuc");
 		group2.setId("grp2");
 		getFixture().getCurrentRSTDocument().getGroups().add(group2);
@@ -164,7 +164,7 @@ public class RST2SaltMapperTest {
 		getFixture().getCurrentRSTDocument().createRelation(group1, group2, "span", null);
 
 		List<Segment> segments = new ArrayList<Segment>();
-		Segment seg1 = RSTFactory.eINSTANCE.createSegment();
+		Segment seg1 = new Segment();
 		seg1.setText(text1);
 		seg1.setId("seg1");
 		segments.add(seg1);
@@ -172,7 +172,7 @@ public class RST2SaltMapperTest {
 
 		getFixture().getCurrentRSTDocument().createRelation(group2, seg1, "conjunction", "multinuc");
 
-		Segment seg2 = RSTFactory.eINSTANCE.createSegment();
+		Segment seg2 = new Segment();
 		seg2.setText(text2);
 		seg2.setId("seg2");
 		segments.add(seg2);
@@ -180,7 +180,7 @@ public class RST2SaltMapperTest {
 
 		getFixture().getCurrentRSTDocument().createRelation(group2, seg2, "conjunction", "multinuc");
 
-		Segment seg3 = RSTFactory.eINSTANCE.createSegment();
+		Segment seg3 = new Segment();
 		seg3.setText(text3);
 		seg3.setId("seg3");
 		segments.add(seg3);
