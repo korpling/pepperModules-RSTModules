@@ -388,20 +388,37 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.getDocument().getDocumentGraph().addNode(signalNode);
 
 		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
+		String associatedSignalNodeId = signal.getSource().getId();
 		signal2rstNode.setSource(signalNode);
-		signal2rstNode.setTarget(this.rstId2SStructure.get(signal.getSource()));
+		signal2rstNode.setTarget(this.rstId2SStructure.get(associatedSignalNodeId));
+
+		Relation outgoingRelation = this.getCurrentRSTDocument().getOutgoingRelation(associatedSignalNodeId);
+		if (outgoingRelation != null) {
+			signal2rstNode.createAnnotation(null, "signal", outgoingRelation.getType());
+		}
+
 		layer.addRelation(signal2rstNode);
+		this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
 
 		List<Integer> tokenIds = signal.getTokenIds();
 		if (tokenIds != null) {
 			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
+			SSpan span = SaltFactory.createSSpan();
+			this.getDocument().getDocumentGraph().addNode(span);
 			for (int tokenId : signal.getTokenIds()) {
-				SDominanceRelation signal2token = SaltFactory.createSDominanceRelation();
-				signal2token.setSource(signalNode);
+			    SSpanningRelation spanRel = SaltFactory.createSSpanningRelation();
+			    spanRel.setSource(span);
 				// tokens are 1-indexed, list is 0-indexed
-				signal2token.setTarget(sTokens.get(tokenId - 1));
-				layer.addRelation(signal2token);
+			    spanRel.setTarget(sTokens.get(tokenId - 1));
+				layer.addRelation(spanRel);
+				this.getDocument().getDocumentGraph().addRelation(spanRel);
 			}
+			SDominanceRelation signal2token = SaltFactory.createSDominanceRelation();
+			signal2token.setType("signal_token");
+			signal2token.setSource(signalNode);
+			signal2token.setTarget(span);
+			layer.addRelation(signal2token);
+			this.getDocument().getDocumentGraph().addRelation(signal2token);
 		}
 	}
 }
