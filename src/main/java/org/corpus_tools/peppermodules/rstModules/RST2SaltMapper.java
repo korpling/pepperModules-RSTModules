@@ -113,6 +113,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			else
 				this.mapSegmentsWithoutTokenize(this.getCurrentRSTDocument().getSegments());
 		}
+
 		// map segments to STextualDS, Tokens and SStructures
 		// map group to SStructure
 		for (Group group : this.getCurrentRSTDocument().getGroups())
@@ -122,7 +123,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		for (Relation relation : this.getCurrentRSTDocument().getRelations()) {
 			this.mapRelation(relation);
 		}
-		// map
+
         this.mapSignals();
 	}
 
@@ -373,20 +374,44 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ signal.getSource().getId() + "'.");
 		}
 
+		// node representing the signal
 		SStructure signalNode = SaltFactory.createSStructure();
 
+		// annotate with type and subtype and text of tokens
 		SAnnotation type = SaltFactory.createSAnnotation();
 		type.setName("signal_type");
 		type.setValue(signal.getType());
+		signalNode.addAnnotation(type);
+
 		SAnnotation subtype = SaltFactory.createSAnnotation();
 		subtype.setName("signal_subtype");
 		subtype.setValue(signal.getSubtype());
-		signalNode.addAnnotation(type);
 		signalNode.addAnnotation(subtype);
+
+		List<Integer> tokenIds = signal.getTokenIds();
+		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
+		if (tokenIds != null) {
+			SAnnotation text = SaltFactory.createSAnnotation();
+
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < tokenIds.size(); i++) {
+			    SToken token = tokens.get(tokenIds.get(i) - 1);
+				String tokenText = getDocument().getDocumentGraph().getText(token);
+
+				sb.append(tokenText);
+				if (i < tokenIds.size() - 1) {
+					sb.append(" ");
+				}
+			}
+			text.setName("signal_text");
+			text.setValue(sb.toString());
+			signalNode.addAnnotation(text);
+		}
 
 		layer.addNode(signalNode);
 		this.getDocument().getDocumentGraph().addNode(signalNode);
 
+		// make the signals node dominate the RST node that is TARGETED by the relation
 		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
 		String associatedSignalNodeId = signal.getSource().getId();
 		signal2rstNode.setSource(signalNode);
@@ -400,25 +425,38 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		layer.addRelation(signal2rstNode);
 		this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
 
-		List<Integer> tokenIds = signal.getTokenIds();
+		// also make the RST node dominate every token
 		if (tokenIds != null) {
 			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
-			SSpan span = SaltFactory.createSSpan();
-			this.getDocument().getDocumentGraph().addNode(span);
 			for (int tokenId : signal.getTokenIds()) {
-			    SSpanningRelation spanRel = SaltFactory.createSSpanningRelation();
-			    spanRel.setSource(span);
+				SDominanceRelation tokRel = SaltFactory.createSDominanceRelation();
+				tokRel.setSource(signalNode);
 				// tokens are 1-indexed, list is 0-indexed
-			    spanRel.setTarget(sTokens.get(tokenId - 1));
-				layer.addRelation(spanRel);
-				this.getDocument().getDocumentGraph().addRelation(spanRel);
+				tokRel.setTarget(sTokens.get(tokenId - 1));
+				tokRel.setType("signal_token");
+				tokRel.setSource(signalNode);
+				layer.addRelation(tokRel);
+				this.getDocument().getDocumentGraph().addRelation(tokRel);
 			}
-			SDominanceRelation signal2token = SaltFactory.createSDominanceRelation();
-			signal2token.setType("signal_token");
-			signal2token.setSource(signalNode);
-			signal2token.setTarget(span);
-			layer.addRelation(signal2token);
-			this.getDocument().getDocumentGraph().addRelation(signal2token);
 		}
+
+		//if (tokenIds != null) {
+		//	SSpan span = SaltFactory.createSSpan();
+		//	this.getDocument().getDocumentGraph().addNode(span);
+		//	for (SToken token : tokens) {
+		//		SSpanningRelation spanRel = SaltFactory.createSSpanningRelation();
+		//		spanRel.setSource(span);
+		//		spanRel.setTarget(token);
+		//		layer.addRelation(spanRel);
+		//		this.getDocument().getDocumentGraph().addRelation(spanRel);
+		//	}
+
+		//	SDominanceRelation domRel = SaltFactory.createSDominanceRelation();
+		//	domRel.setSource(signalNode);
+		//	domRel.setTarget(span);
+		//	domRel.setType("signal_token");
+		//	layer.addRelation(domRel);
+		//	this.getDocument().getDocumentGraph().addRelation(domRel);
+		//}
 	}
 }
