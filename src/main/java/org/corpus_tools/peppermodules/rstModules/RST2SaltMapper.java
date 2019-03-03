@@ -392,20 +392,27 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
 		if (tokenIds != null) {
 			SAnnotation text = SaltFactory.createSAnnotation();
+			SAnnotation tokenIndexes = SaltFactory.createSAnnotation();
 
-			StringBuilder sb = new StringBuilder();
+			StringBuilder tokenTextSb = new StringBuilder();
+			StringBuilder tokenIndexesSb = new StringBuilder();
 			for (int i = 0; i < tokenIds.size(); i++) {
 			    SToken token = tokens.get(tokenIds.get(i) - 1);
 				String tokenText = getDocument().getDocumentGraph().getText(token);
 
-				sb.append(tokenText);
+				tokenTextSb.append(tokenText);
+				tokenIndexesSb.append(tokenIds.get(i).toString());
 				if (i < tokenIds.size() - 1) {
-					sb.append(" ");
+					tokenTextSb.append(" ");
+					tokenIndexesSb.append(" ");
 				}
 			}
 			text.setName("signal_text");
-			text.setValue(sb.toString());
+			text.setValue(tokenTextSb.toString());
+			tokenIndexes.setName("signal_indexes");
+			tokenIndexes.setValue(tokenIndexesSb.toString());
 			signalNode.addAnnotation(text);
+			signalNode.addAnnotation(tokenIndexes);
 		}
 
 		layer.addNode(signalNode);
@@ -417,9 +424,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		signal2rstNode.setSource(signalNode);
 		signal2rstNode.setTarget(this.rstId2SStructure.get(associatedSignalNodeId));
 
-		Relation outgoingRelation = this.getCurrentRSTDocument().getOutgoingRelation(associatedSignalNodeId);
-		if (outgoingRelation != null) {
-			signal2rstNode.createAnnotation(null, "signal", outgoingRelation.getType());
+		Relation incomingRelation = this.getCurrentRSTDocument().getIncomingRelations(associatedSignalNodeId).get(0);
+		if (incomingRelation != null) {
+			// annotate the edge connecting signal and rst node
+			signal2rstNode.createAnnotation(null, "signal", incomingRelation.getName());
+			// also annotate the signal node itself
+			signalNode.createAnnotation(null, "signaled_relation", incomingRelation.getName());
 		}
 
 		layer.addRelation(signal2rstNode);
