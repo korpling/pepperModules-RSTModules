@@ -374,26 +374,14 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ signal.getSource().getId() + "'.");
 		}
 
-		// node representing the signal
-		SStructure signalNode = SaltFactory.createSStructure();
-
-		// annotate with type and subtype and text of tokens
-		SAnnotation type = SaltFactory.createSAnnotation();
-		type.setName("signal_type");
-		type.setValue(signal.getType());
-		signalNode.addAnnotation(type);
-
-		SAnnotation subtype = SaltFactory.createSAnnotation();
-		subtype.setName("signal_subtype");
-		subtype.setValue(signal.getSubtype());
-		signalNode.addAnnotation(subtype);
-
 		List<Integer> tokenIds = signal.getTokenIds();
 		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
-		if (tokenIds != null) {
-			SAnnotation text = SaltFactory.createSAnnotation();
-			SAnnotation tokenIndexes = SaltFactory.createSAnnotation();
 
+		// create node representing the signal
+		SStructure signalNode = SaltFactory.createSStructure();
+
+		// add annotations to the signal node: signal_text for space-separated tokens, signal_indexes for their indexes
+		if (tokenIds != null) {
 			StringBuilder tokenTextSb = new StringBuilder();
 			StringBuilder tokenIndexesSb = new StringBuilder();
 			for (int i = 0; i < tokenIds.size(); i++) {
@@ -407,18 +395,16 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					tokenIndexesSb.append(" ");
 				}
 			}
-			text.setName("signal_text");
-			text.setValue(tokenTextSb.toString());
-			tokenIndexes.setName("signal_indexes");
-			tokenIndexes.setValue(tokenIndexesSb.toString());
-			signalNode.addAnnotation(text);
-			signalNode.addAnnotation(tokenIndexes);
+			signalNode.createAnnotation(null, "signal_text", tokenTextSb.toString());
+			signalNode.createAnnotation(null, "signal_indexes", tokenIndexesSb.toString());
 		}
 
 		layer.addNode(signalNode);
 		this.getDocument().getDocumentGraph().addNode(signalNode);
 
-		// make the signals node dominate the RST node that is TARGETED by the relation
+		// make the signals node dominate the RST node that it is associated with. When RST is represented graphically,
+		// this is the node that the arrow points out of, but in Salt, it is the node that is the child of a dominance
+		// relation
 		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
 		String associatedSignalNodeId = signal.getSource().getId();
 		signal2rstNode.setSource(signalNode);
