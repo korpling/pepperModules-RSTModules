@@ -380,7 +380,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		// create node representing the signal
 		SStructure signalNode = SaltFactory.createSStructure();
 		signalNode.createAnnotation(null, "signal_type", signal.getType());
-		signalNode.createAnnotation(null, "signal_subtype", signal.getType());
+		signalNode.createAnnotation(null, "signal_subtype", signal.getSubtype());
 
 		// add annotations to the signal node: signal_text for space-separated tokens, signal_indexes for their indexes
 		if (tokenIds != null) {
