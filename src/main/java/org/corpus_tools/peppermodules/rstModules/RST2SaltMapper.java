@@ -124,7 +124,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			this.mapRelation(relation);
 		}
 
-        this.mapSignals();
+		this.mapSignals();
 	}
 
 	/**
@@ -437,24 +437,5 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				this.getDocument().getDocumentGraph().addRelation(tokRel);
 			}
 		}
-
-		//if (tokenIds != null) {
-		//	SSpan span = SaltFactory.createSSpan();
-		//	this.getDocument().getDocumentGraph().addNode(span);
-		//	for (SToken token : tokens) {
-		//		SSpanningRelation spanRel = SaltFactory.createSSpanningRelation();
-		//		spanRel.setSource(span);
-		//		spanRel.setTarget(token);
-		//		layer.addRelation(spanRel);
-		//		this.getDocument().getDocumentGraph().addRelation(spanRel);
-		//	}
-
-		//	SDominanceRelation domRel = SaltFactory.createSDominanceRelation();
-		//	domRel.setSource(signalNode);
-		//	domRel.setTarget(span);
-		//	domRel.setType("signal_token");
-		//	layer.addRelation(domRel);
-		//	this.getDocument().getDocumentGraph().addRelation(domRel);
-		//}
 	}
 }
