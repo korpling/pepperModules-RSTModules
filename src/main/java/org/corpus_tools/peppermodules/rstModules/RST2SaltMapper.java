@@ -387,7 +387,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			StringBuilder tokenTextSb = new StringBuilder();
 			StringBuilder tokenIndexesSb = new StringBuilder();
 			for (int i = 0; i < tokenIds.size(); i++) {
-			    SToken token = tokens.get(tokenIds.get(i) - 1);
+				SToken token = tokens.get(tokenIds.get(i) - 1);
 				String tokenText = getDocument().getDocumentGraph().getText(token);
 
 				tokenTextSb.append(tokenText);
