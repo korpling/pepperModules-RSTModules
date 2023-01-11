@@ -320,8 +320,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		if (relation != null) {
 			if (relation.getParent() == null)
 				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the parent of a relation is empty.");
-			if (relation.getParent() == null)
-				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the source of a relation is empty.");
+			if (relation.getChild() == null)
+				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the child of a relation is empty.");
 
 			SStructure sSource = this.rstId2SStructure.get(relation.getParent().getId());
 			SStructure sTarget = this.rstId2SStructure.get(relation.getChild().getId());
