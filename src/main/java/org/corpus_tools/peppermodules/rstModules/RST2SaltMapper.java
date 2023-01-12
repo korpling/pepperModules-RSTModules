@@ -64,7 +64,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 */
 	private void init() {
 		this.tokenizer = new Tokenizer();
-		this.rstId2SStructure = new Hashtable<String, SStructure>();
+		this.rstId2SStructure = new Hashtable<>();
+		this.secondaryEdgeIndex = new Hashtable<>();
 	}
 
 	private RSTDocument currentRSTDocument = null;
@@ -74,6 +75,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	}
 
 	public RSTDocument getCurrentRSTDocument() {
+		this.rstId2SStructure = new Hashtable<>();
+		this.secondaryEdgeIndex = new Hashtable<>();
 		return this.currentRSTDocument;
 	}
 
@@ -88,7 +91,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	public DOCUMENT_STATUS mapSDocument() {
 		RSTDocument rstDocument;
 		rstDocument = new RSTDocument(this.getResourceURI());
-
+		this.rstId2SStructure = new Hashtable<>();
+		this.secondaryEdgeIndex = new Hashtable<>();
 		this.mapSDocument(rstDocument);
 
 		return (DOCUMENT_STATUS.COMPLETED);
@@ -137,6 +141,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 * The TreeTaggerTokenizer to tokenize an untokenized primary text.
 	 */
 	private Tokenizer tokenizer = null;
+
+	/**
+	 * Mapping from secondary edge ID to the SPointingRelation representing it
+	 */
+	private Hashtable<String, SPointingRelation> secondaryEdgeIndex = null;
 
 	/**
 	 * Returns the TreeTaggerTokenizer to tokenize an untokenized primary text.
@@ -391,16 +400,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		//////////////////////////////////////////////////////////////////////////////////
 		// Signal node setup
 		//////////////////////////////////////////////////////////////////////////////////
-		// Determine whether the signal is associated with a normal edge
+		// Determine whether the signal is associated with a normal or a secondary edge
 		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
-		// Determine whether the signal is associated with a secondary edge by checking for whether we have an
-		// SPointingRelation with the same ID as the signal's source attribute
-		List<SPointingRelation> prs = this.getDocument().getDocumentGraph().getPointingRelations();
-		SPointingRelation secondaryEdge = null;
-		for (SPointingRelation pr : prs) {
-			if (pr.getAnnotation("xml_id").getValue().equals(signal.getSource().getId()))
-				secondaryEdge = pr;
-		}
+		SPointingRelation secondaryEdge = this.secondaryEdgeIndex.get(signal.getSource().getId());
 
 		// If neither is true, throw
 		if (sSource == null && secondaryEdge == null) {
@@ -542,7 +544,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 
 		SPointingRelation ePR = SaltFactory.createSPointingRelation();
-		ePR.createAnnotation(null, "xml_id", e.getId());
+		this.secondaryEdgeIndex.put(e.getId(), ePR);
 		String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
 		ePR.createAnnotation(null, relationNameKey, e.getRelationName());
 		// For primary edges, this type is determined by the information in the <relations /> element in the header:
