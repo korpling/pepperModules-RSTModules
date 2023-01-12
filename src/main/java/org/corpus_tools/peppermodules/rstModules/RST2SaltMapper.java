@@ -191,7 +191,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				} else
 					sText.setText(segment.getText());
 				int end = sText.getText().length();
-                                
+
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
                                         seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1; // get 0 based index of last seen token; -1 if this is the very first token
@@ -455,9 +455,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			if (incomingRelations != null && incomingRelations.size() > 0) {
 				Relation incomingRelation = incomingRelations.get(0);
 				// annotate the edge connecting signal and rst node
-				signal2rstNode.createAnnotation(null, "signal", incomingRelation.getName());
+				signal2rstNode.createAnnotation("prim", "signal", incomingRelation.getName());
 				// also annotate the signal node itself
-				signalNode.createAnnotation(null, "signaled_relation", incomingRelation.getName());
+				signalNode.createAnnotation("prim", "signaled_relation", incomingRelation.getName());
 			}
 
 			layer.addRelation(signal2rstNode);
@@ -473,8 +473,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signal2source.setTarget(seSource);
 			signal2target.setSource(signalNode);
 			signal2target.setTarget(seTarget);
-			signal2source.createAnnotation(null, "secondary_signal", secondaryEdge.getName());
-			signalNode.createAnnotation(null, "secondary_signaled_relation", secondaryEdge.getName());
+			signal2source.createAnnotation("sec", "signal", secondaryEdge.getAnnotation(((RSTImporterProperties) this.getProperties()).getRelationName()).getValue());
+			signalNode.createAnnotation("sec", "signaled_relation", secondaryEdge.getName());
 			this.getDocument().getDocumentGraph().addRelation(signal2source);
 			this.getDocument().getDocumentGraph().addRelation(signal2target);
 			layer.addRelation(signal2source);
@@ -485,17 +485,13 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	private void mapSecondaryEdges() {
 		List<SecondaryEdge> secondaryEdges = this.getCurrentRSTDocument().getSecondaryEdges();
 		if (secondaryEdges != null && secondaryEdges.size() > 0) {
-			SLayer secondaryEdgesLayer = SaltFactory.createSLayer();
-			String layerName = ((RSTImporterProperties) this.getProperties()).getSecondaryEdgesLayerName();
-			secondaryEdgesLayer.setName(layerName);
 			for (SecondaryEdge e : this.getCurrentRSTDocument().getSecondaryEdges()) {
-				this.mapSecondaryEdge(e, secondaryEdgesLayer);
+				this.mapSecondaryEdge(e);
 			}
-			this.getDocument().getDocumentGraph().addLayer(secondaryEdgesLayer);
 		}
 	}
 
-	private void mapSecondaryEdge(SecondaryEdge e, SLayer layer) {
+	private void mapSecondaryEdge(SecondaryEdge e) {
 		if (e == null) {
 			return;
 		}
@@ -524,10 +520,10 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 		SPointingRelation ePR = SaltFactory.createSPointingRelation();
 		ePR.createAnnotation(null, "xml_id", e.getId());
-		ePR.setName(e.getRelationName());
+		ePR.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), e.getRelationName());
+		ePR.setType("rst");
 		ePR.setSource(sSource);
 		ePR.setTarget((sTarget));
 		this.getDocument().getDocumentGraph().addRelation(ePR);
-		layer.addRelation(ePR);
 	}
 }
