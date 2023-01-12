@@ -353,7 +353,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				this.mapSignal(signal, signalsLayer);
 			}
 
-			this.getDocument().addLayer(signalsLayer);
+			this.getDocument().getDocumentGraph().addLayer(signalsLayer);
 		}
 	}
 
@@ -410,10 +410,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
 		String associatedSignalNodeId = signal.getSource().getId();
 		signal2rstNode.setSource(signalNode);
-		signal2rstNode.setTarget(this.rstId2SStructure.get(associatedSignalNodeId));
+		signal2rstNode.setTarget(sSource);
 
-		Relation incomingRelation = this.getCurrentRSTDocument().getIncomingRelations(associatedSignalNodeId).get(0);
-		if (incomingRelation != null) {
+		List<Relation> incomingRelations = this.getCurrentRSTDocument().getIncomingRelations(associatedSignalNodeId);
+		if (incomingRelations != null && incomingRelations.size() > 0) {
+			Relation incomingRelation = incomingRelations.get(0);
 			// annotate the edge connecting signal and rst node
 			signal2rstNode.createAnnotation(null, "signal", incomingRelation.getName());
 			// also annotate the signal node itself
