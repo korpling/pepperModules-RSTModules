@@ -45,11 +45,11 @@ import org.corpus_tools.salt.core.SLayer;
  * <li>
  * the text including in a segment will be tokenized and SToken objects will be
  * created</li>
- * 
+ *
  * </ul>
- * 
+ *
  * @author Florian Zipser, Luke Gessler
- * 
+ *
  */
 public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
@@ -81,7 +81,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 	/**
 	 * {@inheritDoc PepperMapper#setDocument(SDocument)}
-	 * 
+	 *
 	 * OVERRIDE THIS METHOD FOR CUSTOMIZED MAPPING.
 	 */
 	@Override
@@ -97,7 +97,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
 	 * Maps the given {@link RSTDocument} to th {@link SDocument} given at
 	 * {@link #getDocument()}.
-	 * 
+	 *
 	 * @param rstDocument
 	 */
 	public void mapSDocument(RSTDocument rstDocument) {
@@ -140,7 +140,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 	/**
 	 * Returns the TreeTaggerTokenizer to tokenize an untokenized primary text.
-	 * 
+	 *
 	 * @return
 	 */
 	public Tokenizer getTokenizer() {
@@ -164,18 +164,21 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 * to the {@link STextualDS} object. As last a {@link SStructure} object for
 	 * the {@link Segment} object will be created and related to the
 	 * {@link SToken} objects.
-	 * 
+	 *
 	 * @param segments
 	 *            a list of {@link Segment} objects
 	 * @return
 	 */
 	public void mapSegmentsWithTokenize(List<Segment> segments) {
 		STextualDS sText = null;
-                int seenTokens = 0;
-                Character[] seps = null;
-                if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
-                    seps = ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().toArray(new Character[((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators().size()]);
-                }
+		List<Character> simpleTokenizationSeparators = ((RSTImporterProperties) getProperties())
+				.getSimpleTokenizationSeparators();
+		int seenTokens = 0;
+		Character[] seps = null;
+		if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
+			seps = ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()
+					.toArray(new Character[simpleTokenizationSeparators.size()]);
+		}
 		if ((segments != null) && (segments.size() > 0)) {
 			sText = SaltFactory.createSTextualDS();
 			this.getDocument().getDocumentGraph().addNode(sText);
@@ -187,29 +190,35 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				int start = 0;
 				if (sText.getText() != null) {
 					start = sText.getText().length();
-					sText.setText(sText.getText() + ((RSTImporterProperties) this.getProperties()).getSegmentSeparator() + segment.getText());
+					String segmentSeparator = ((RSTImporterProperties) this.getProperties()).getSegmentSeparator();
+					sText.setText(sText.getText() + segmentSeparator + segment.getText());
 				} else
 					sText.setText(segment.getText());
 				int end = sText.getText().length();
 
 				if (((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()!= null){
 					SimpleTokenizer tokenizer= new SimpleTokenizer();
-                                        seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1; // get 0 based index of last seen token; -1 if this is the very first token
+					// get 0 based index of last seen token; -1 if this is the very first token
+					seenTokens = getDocument().getDocumentGraph().getTokens().size() - 1;
 					tokenizer.setDocumentGraph(getDocument().getDocumentGraph());
-					tokenizer.tokenize(sText, start, end, seps);  // note that the SimpleTokenizer does not return tokens, but alters the document graph with new tokens
-                                        // collect the new tokens as a sublist from the document's current graph
-                                        tokens = getDocument().getDocumentGraph().getTokens().subList(seenTokens+1, getDocument().getDocumentGraph().getTokens().size());
-
-				}else{
+					// note that the SimpleTokenizer does not return tokens, but alters the document graph with new tokens
+					tokenizer.tokenize(sText, start, end, seps);
+					// collect the new tokens as a sublist from the document's current graph
+					tokens = getDocument().getDocumentGraph().getTokens()
+							.subList(seenTokens+1, getDocument().getDocumentGraph().getTokens().size());
+				} else {
 					Tokenizer tokenizer = this.getDocument().getDocumentGraph().createTokenizer();
-					tokens = tokenizer.tokenize(sText, null, start, end); // the normal Tokenizer actually returns the tokens
+					// the normal Tokenizer actually returns the tokens
+					tokens = tokenizer.tokenize(sText, null, start, end);
 				}
 				if ((tokens != null) && (tokens.size() > 0)) {// if tokens exist
 					SStructure sStruct = SaltFactory.createSStructure();
 					sStruct.setName(segment.getId());
-					sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
+					String nodeKindKey = ((RSTImporterProperties) this.getProperties()).getNodeKindName();
+					String nodeTypeKey = ((RSTImporterProperties) this.getProperties()).getNodeTypeName();
+					sStruct.createAnnotation(null, nodeKindKey, NODE_KIND_SEGMENT);
 					if (segment.getType() != null)
-						sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
+						sStruct.createAnnotation(null, nodeTypeKey, segment.getType());
 
 					// puts segment.id and mapped SStructure-object into table
 					this.rstId2SStructure.put(segment.getId(), sStruct);
@@ -233,7 +242,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 * added to the SDocumentGraph. Also a SToken object will be created and
 	 * related to the STextualDS. As last a SSTructure object for the segment
 	 * will be created and related to the tokens.
-	 * 
+	 *
 	 * @param segments
 	 * @return
 	 */
@@ -250,9 +259,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				// relations
 				i++;
 				SStructure sStruct = SaltFactory.createSStructure();
-				sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeKindName(), NODE_KIND_SEGMENT);
+				String nodeKindKey = ((RSTImporterProperties) this.getProperties()).getNodeKindName();
+				String nodeTypeKey = ((RSTImporterProperties) this.getProperties()).getNodeTypeName();
+				sStruct.createAnnotation(null, nodeKindKey, NODE_KIND_SEGMENT);
 				if (segment.getType() != null)
-					sStruct.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), segment.getType());
+					sStruct.createAnnotation(null, nodeTypeKey, segment.getType());
 				sStruct.setName(segment.getId());
 				// puts segment.id and mapped SStructure-object into table
 				this.rstId2SStructure.put(segment.getId(), sStruct);
@@ -284,7 +295,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
 	 * Maps the given group to a SStructure object, The SStructure object will
 	 * be added to the graph
-	 * 
+	 *
 	 * @param group
 	 * @return the created SStructure-object
 	 */
@@ -293,8 +304,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		if (group != null) {
 			sStructure = SaltFactory.createSStructure();
 			sStructure.setName(group.getId());
+			String nodeNameKey = ((RSTImporterProperties) this.getProperties()).getNodeTypeName();
 			if (group.getType() != null)
-				sStructure.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getNodeTypeName(), group.getType());
+				sStructure.createAnnotation(null, nodeNameKey, group.getType());
 
 			// puts segment.id and mapped SSTructure-object into table
 			this.rstId2SStructure.put(group.getId(), sStructure);
@@ -313,22 +325,28 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
 	 * Mapps the given relation to one in the Salt model. Further artificial
 	 * ones will be created.
-	 * 
+	 *
 	 * @param relation
 	 */
 	private void mapRelation(Relation relation) {
 		if (relation != null) {
 			if (relation.getParent() == null)
-				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the parent of a relation is empty.");
+				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+						+ "', because the parent of a relation is empty.");
 			if (relation.getChild() == null)
-				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the child of a relation is empty.");
+				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+						+ "', because the child of a relation is empty.");
 
 			SStructure sSource = this.rstId2SStructure.get(relation.getParent().getId());
 			SStructure sTarget = this.rstId2SStructure.get(relation.getChild().getId());
 			if (sSource == null)
-				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the parent of a relation points to a non existing node with id '" + relation.getChild().getId() + "'.");
+				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+						+ "', because the parent of a relation points to a non existing node with id '"
+						+ relation.getChild().getId() + "'.");
 			if (sTarget == null)
-				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI() + "', because the parent of a relation belongs to a non existing node with id '" + relation.getParent().getId() + "'.");
+				throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+						+ "', because the parent of a relation belongs to a non existing node with id '"
+						+ relation.getParent().getId() + "'.");
 
 			SDominanceRelation sDomRel = SaltFactory.createSDominanceRelation();
 			if (relation.getType() != null)
@@ -338,7 +356,10 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			this.getDocument().getDocumentGraph().addRelation(sDomRel);
 
 			if (relation.getName() != null)
-				sDomRel.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), relation.getName());
+				sDomRel.createAnnotation(
+						null,
+						((RSTImporterProperties) this.getProperties()).getRelationName(),
+						relation.getName());
 		}
 	}
 
@@ -473,7 +494,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signal2source.setTarget(seSource);
 			signal2target.setSource(signalNode);
 			signal2target.setTarget(seTarget);
-			signal2source.createAnnotation("sec", "signal", secondaryEdge.getAnnotation(((RSTImporterProperties) this.getProperties()).getRelationName()).getValue());
+			String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
+			signal2source.createAnnotation("sec", "signal",
+					secondaryEdge.getAnnotation(relationNameKey).getValue());
 			signalNode.createAnnotation("sec", "signaled_relation", secondaryEdge.getName());
 			this.getDocument().getDocumentGraph().addRelation(signal2source);
 			this.getDocument().getDocumentGraph().addRelation(signal2target);
@@ -520,7 +543,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 		SPointingRelation ePR = SaltFactory.createSPointingRelation();
 		ePR.createAnnotation(null, "xml_id", e.getId());
-		ePR.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), e.getRelationName());
+		String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
+		ePR.createAnnotation(null, relationNameKey, e.getRelationName());
 		// For primary edges, this type is determined by the information in the <relations /> element in the header:
 		// multinuclear relations have type "multinuc", and all others have type "rst". Since secondary edges can
 		// never be multinuclear, we just set the type to "rst" here.
