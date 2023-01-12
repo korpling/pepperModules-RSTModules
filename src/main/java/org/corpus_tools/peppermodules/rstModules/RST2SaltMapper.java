@@ -358,31 +358,49 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	}
 
 	private void mapSignal(Signal signal, SLayer layer) {
+		// If the signal is null or its source attribute is null, quit
 		if (signal == null) {
 			return;
 		}
-
 		if (signal.getSource() == null) {
 			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
 					+ "', because the source of a signal is empty.");
 		}
 
+		//////////////////////////////////////////////////////////////////////////////////
+		// Signal node setup
+		//////////////////////////////////////////////////////////////////////////////////
+		// Determine whether the signal is associated with a normal edge
 		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
-		if (sSource == null) {
+		// Determine whether the signal is associated with a secondary edge by checking for whether we have an
+		// SPointingRelation with the same ID as the signal's source attribute
+		List<SPointingRelation> prs = this.getDocument().getDocumentGraph().getPointingRelations();
+		SPointingRelation secondaryEdge = null;
+		for (SPointingRelation pr : prs) {
+			if (pr.getAnnotation("xml_id").getValue().equals(signal.getSource().getId()))
+				secondaryEdge = pr;
+		}
+
+		// If neither is true, throw
+		if (sSource == null && secondaryEdge == null) {
 			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
 					+ "', because the parent of a signal points to a non existing node with id '"
 					+ signal.getSource().getId() + "'.");
 		}
 
-		List<Integer> tokenIds = signal.getTokenIds();
-		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
-
 		// create node representing the signal
 		SStructure signalNode = SaltFactory.createSStructure();
 		signalNode.createAnnotation(null, "signal_type", signal.getType());
 		signalNode.createAnnotation(null, "signal_subtype", signal.getSubtype());
+		layer.addNode(signalNode);
+		this.getDocument().getDocumentGraph().addNode(signalNode);
 
+		//////////////////////////////////////////////////////////////////////////////////
+		// Token handling
+		//////////////////////////////////////////////////////////////////////////////////
 		// add annotations to the signal node: signal_text for space-separated tokens, signal_indexes for their indexes
+		List<Integer> tokenIds = signal.getTokenIds();
+		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
 		if (tokenIds != null) {
 			StringBuilder tokenTextSb = new StringBuilder();
 			StringBuilder tokenIndexesSb = new StringBuilder();
@@ -401,30 +419,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signalNode.createAnnotation(null, "signal_indexes", tokenIndexesSb.toString());
 		}
 
-		layer.addNode(signalNode);
-		this.getDocument().getDocumentGraph().addNode(signalNode);
-
-		// make the signals node dominate the RST node that it is associated with. When RST is represented graphically,
-		// this is the node that the arrow points out of, but in Salt, it is the node that is the child of a dominance
-		// relation
-		SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
-		String associatedSignalNodeId = signal.getSource().getId();
-		signal2rstNode.setSource(signalNode);
-		signal2rstNode.setTarget(sSource);
-
-		List<Relation> incomingRelations = this.getCurrentRSTDocument().getIncomingRelations(associatedSignalNodeId);
-		if (incomingRelations != null && incomingRelations.size() > 0) {
-			Relation incomingRelation = incomingRelations.get(0);
-			// annotate the edge connecting signal and rst node
-			signal2rstNode.createAnnotation(null, "signal", incomingRelation.getName());
-			// also annotate the signal node itself
-			signalNode.createAnnotation(null, "signaled_relation", incomingRelation.getName());
-		}
-
-		layer.addRelation(signal2rstNode);
-		this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
-
-		// also make the RST node dominate every token
+		// also make the signal node dominate every token
 		if (tokenIds != null) {
 			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
 			for (int tokenId : signal.getTokenIds()) {
@@ -437,6 +432,53 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				layer.addRelation(tokRel);
 				this.getDocument().getDocumentGraph().addRelation(tokRel);
 			}
+		}
+
+		//////////////////////////////////////////////////////////////////////////////////
+		// Signal to other node relation creation
+		//////////////////////////////////////////////////////////////////////////////////
+		if (secondaryEdge == null) {
+			// make the signal node dominate the RST node that it is associated with. When
+			// RST is represented graphically, this is the node that the arrow points out of,
+			// but in Salt, it is the node that is the child of a dominance relation
+			SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
+			String associatedSignalNodeId = signal.getSource().getId();
+			signal2rstNode.setSource(signalNode);
+			signal2rstNode.setTarget(sSource);
+
+			// If the discourse unit associated with this signal has a parent (i.e., it is
+			// the satellite of a nucleus), then we want to add some additional annotations.
+			// Specifically, we want to add the name of the relation to the signal relation,
+			// and we want to annotate teh signal node with the name of the relation.
+			List<Relation> incomingRelations = this.getCurrentRSTDocument()
+					.getIncomingRelations(associatedSignalNodeId);
+			if (incomingRelations != null && incomingRelations.size() > 0) {
+				Relation incomingRelation = incomingRelations.get(0);
+				// annotate the edge connecting signal and rst node
+				signal2rstNode.createAnnotation(null, "signal", incomingRelation.getName());
+				// also annotate the signal node itself
+				signalNode.createAnnotation(null, "signaled_relation", incomingRelation.getName());
+			}
+
+			layer.addRelation(signal2rstNode);
+			this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
+		} else {
+			// If we have a secondary edge associated with the signal, then our strategy is going to be
+			// different: the signal node will have two dominance relations, one for each of the SE's ends
+			SStructure seSource = (SStructure) secondaryEdge.getSource();
+			SStructure seTarget = (SStructure) secondaryEdge.getTarget();
+			SDominanceRelation signal2source = SaltFactory.createSDominanceRelation();
+			SDominanceRelation signal2target = SaltFactory.createSDominanceRelation();
+			signal2source.setSource(signalNode);
+			signal2source.setTarget(seSource);
+			signal2target.setSource(signalNode);
+			signal2target.setTarget(seTarget);
+			signal2source.createAnnotation(null, "secondary_signal", secondaryEdge.getName());
+			signalNode.createAnnotation(null, "secondary_signaled_relation", secondaryEdge.getName());
+			this.getDocument().getDocumentGraph().addRelation(signal2source);
+			this.getDocument().getDocumentGraph().addRelation(signal2target);
+			layer.addRelation(signal2source);
+			layer.addRelation(signal2target);
 		}
 	}
 
@@ -480,30 +522,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ e.getTarget().getId() + "'.");
 		}
 
-		// Despite the name, a "secondary edge" is actually like an EDU or a CDU (complex discourse unit).
-		// We therefore represent it with an SStructure with two pointing relations between it and its
-		// source and target nodes.
-		SStructure seNode = SaltFactory.createSStructure();
-		seNode.setName(e.getId());
-
-		SPointingRelation inbound = SaltFactory.createSPointingRelation();
-		inbound.setType(e.getRelationName() + "-in");
-		inbound.setName(e.getId() + "|secondary|in");
-		inbound.setSource(sSource);
-		inbound.setTarget(seNode);
-
-		SPointingRelation outbound = SaltFactory.createSPointingRelation();
-		outbound.setType(e.getRelationName() + "-out");
-		outbound.setName(e.getId() + "|secondary|out");
-		outbound.setSource(seNode);
-		outbound.setTarget(sTarget);
-
-		layer.addNode(seNode);
-		layer.addRelation(outbound);
-		layer.addRelation(inbound);
-		this.getDocument().getDocumentGraph().addNode(seNode);
-		this.getDocument().getDocumentGraph().addRelation(outbound);
-		this.getDocument().getDocumentGraph().addRelation(inbound);
-		this.rstId2SStructure.put(e.getId(), seNode);
+		SPointingRelation ePR = SaltFactory.createSPointingRelation();
+		ePR.createAnnotation(null, "xml_id", e.getId());
+		ePR.setName(e.getRelationName());
+		ePR.setSource(sSource);
+		ePR.setTarget((sTarget));
+		this.getDocument().getDocumentGraph().addRelation(ePR);
+		layer.addRelation(ePR);
 	}
 }
