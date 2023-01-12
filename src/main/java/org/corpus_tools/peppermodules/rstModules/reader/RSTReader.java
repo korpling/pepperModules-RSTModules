@@ -35,6 +35,7 @@ public class RSTReader extends DefaultHandler2 {
         this.idRelationTable = new HashMap<String, Vector<Relation>>();
         this.rstElementStack = new Stack<RSTReader.RSTElements>();
         this.relNameType = new HashMap<String, String>();
+        this.signalTypes = new HashMap<String, Set<String>>();
     }
 
     // ========================= start: RSTFile
@@ -76,7 +77,8 @@ public class RSTReader extends DefaultHandler2 {
      * XML-element types for RST
      */
     public enum RSTElements {
-        RST, HEADER, ENCODING, RELATIONS, REL, BODY, SEGMENT, GROUP, SIGNALS, SIGNAL
+        RST, HEADER, ENCODING, RELATIONS, REL, BODY, SEGMENT, GROUP,
+        SIGNAL_TYPES, SIGNAL_TYPE, SIGNALS, SIGNAL, SECONDARY_EDGES, SECONDARY_EDGE
     };
 
     /**
@@ -94,6 +96,11 @@ public class RSTReader extends DefaultHandler2 {
      * the header
      */
     private HashMap<String, String> relNameType = null;
+
+    /**
+     * Contains pairs of <type, subtypes> as specified in the header
+     */
+    private HashMap<String, Set<String>> signalTypes = null;
 
     /**
      * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
@@ -169,6 +176,17 @@ public class RSTReader extends DefaultHandler2 {
 
         else if (qName.equals(RSTVocabulary.TAG_RELATIONS)) {
             this.rstElementStack.push(RSTElements.RELATIONS);
+        }
+
+        else if (qName.equals(RSTVocabulary.TAG_SIGNAL_TYPES)) {
+            this.rstElementStack.push(RSTElements.SIGNAL_TYPES);
+        }
+
+        else if (qName.equals(RSTVocabulary.TAG_SIGNAL_TYPE)) {
+            this.rstElementStack.push(RSTElements.SIGNAL_TYPE);
+            String type = attributes.getValue(RSTVocabulary.ATT_TYPE);
+            String[] subtypes = attributes.getValue(RSTVocabulary.ATT_SUBTYPES).split(";");
+            this.signalTypes.put(type, new HashSet<>(Arrays.asList(subtypes)));
         }
 
         else if (qName.equals(RSTVocabulary.TAG_REL)) {
@@ -273,7 +291,7 @@ public class RSTReader extends DefaultHandler2 {
         }
 
         else if (qName.equals(RSTVocabulary.TAG_SIGNAL)) {
-            this.rstElementStack.push(RSTElements.GROUP);
+            this.rstElementStack.push(RSTElements.SIGNAL);
             Signal signal = new Signal();
             signal.setType(attributes.getValue(RSTVocabulary.ATT_TYPE));
             signal.setSubtype(attributes.getValue(RSTVocabulary.ATT_SUBTYPE));
@@ -292,6 +310,32 @@ public class RSTReader extends DefaultHandler2 {
             AbstractNode sourceNode = this.idAbstractNodeTable.get(attributes.getValue(RSTVocabulary.ATT_SOURCE));
             signal.setSource(sourceNode);
             this.getRSTDocument().getSignals().add(signal);
+        }
+
+        else if (qName.equals(RSTVocabulary.TAG_SECONDARY_EDGES)) {
+            this.rstElementStack.push(RSTElements.SECONDARY_EDGES);
+        }
+
+        else if (qName.equals(RSTVocabulary.TAG_SECONDARY_EDGE)) {
+            this.rstElementStack.push(RSTElements.SECONDARY_EDGE);
+            SecondaryEdge e = new SecondaryEdge();
+            e.setId(attributes.getValue(RSTVocabulary.ATT_ID));
+            e.setRelationName(attributes.getValue(RSTVocabulary.ATT_RELNAME));
+
+            AbstractNode source = this.idAbstractNodeTable.get(attributes.getValue(RSTVocabulary.ATT_SOURCE));
+            if (source == null) {
+                throw new RSTException("Secondary edge references a source node that doesn't exist!");
+            } else {
+                e.setSource(source);
+            }
+            AbstractNode target = this.idAbstractNodeTable.get(attributes.getValue(RSTVocabulary.ATT_TARGET));
+            if (target == null) {
+                throw new RSTException("Secondary edge references a target node that doesn't exist!");
+            } else {
+                e.setTarget(target);
+            }
+            this.idAbstractNodeTable.put(e.getId(), e);
+            this.getRSTDocument().getSecondaryEdges().add(e);
         }
     }
 
@@ -333,15 +377,21 @@ abstract class RSTVocabulary {
     public static final String TAG_BODY = "body";
     public static final String TAG_SEGMENT = "segment";
     public static final String TAG_GROUP = "group";
+    public static final String TAG_SIGNAL_TYPES = "sigtypes";
+    public static final String TAG_SIGNAL_TYPE = "sig";
     public static final String TAG_SIGNALS = "signals";
     public static final String TAG_SIGNAL = "signal";
+    public static final String TAG_SECONDARY_EDGES = "secedges";
+    public static final String TAG_SECONDARY_EDGE = "secedge";
 
     public static final String ATT_NAME = "name";
     public static final String ATT_PARENT = "parent";
     public static final String ATT_TYPE = "type";
     public static final String ATT_SUBTYPE = "subtype";
+    public static final String ATT_SUBTYPES = "subtypes";
     public static final String ATT_ID = "id";
     public static final String ATT_RELNAME = "relname";
     public static final String ATT_SOURCE = "source";
+    public static final String ATT_TARGET = "target";
     public static final String ATT_TOKENS = "tokens";
 }

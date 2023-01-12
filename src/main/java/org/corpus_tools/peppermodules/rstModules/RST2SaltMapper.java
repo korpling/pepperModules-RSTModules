@@ -123,7 +123,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		for (Relation relation : this.getCurrentRSTDocument().getRelations()) {
 			this.mapRelation(relation);
 		}
-
+		this.mapSecondaryEdges();
 		this.mapSignals();
 	}
 
@@ -438,5 +438,72 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				this.getDocument().getDocumentGraph().addRelation(tokRel);
 			}
 		}
+	}
+
+	private void mapSecondaryEdges() {
+		List<SecondaryEdge> secondaryEdges = this.getCurrentRSTDocument().getSecondaryEdges();
+		if (secondaryEdges != null && secondaryEdges.size() > 0) {
+			SLayer secondaryEdgesLayer = SaltFactory.createSLayer();
+			String layerName = ((RSTImporterProperties) this.getProperties()).getSecondaryEdgesLayerName();
+			secondaryEdgesLayer.setName(layerName);
+			for (SecondaryEdge e : this.getCurrentRSTDocument().getSecondaryEdges()) {
+				this.mapSecondaryEdge(e, secondaryEdgesLayer);
+			}
+			this.getDocument().getDocumentGraph().addLayer(secondaryEdgesLayer);
+		}
+	}
+
+	private void mapSecondaryEdge(SecondaryEdge e, SLayer layer) {
+		if (e == null) {
+			return;
+		}
+
+		if (e.getSource() == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file '" + this.getResourceURI()
+					+ "', because the source of a secondary edge is empty.");
+		}
+		if (e.getTarget() == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file '" + this.getResourceURI()
+					+ "', because the target of a secondary edge is empty.");
+		}
+
+		SStructure sSource = this.rstId2SStructure.get(e.getSource().getId());
+		SStructure sTarget = this.rstId2SStructure.get(e.getTarget().getId());
+		if (sSource == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+					+ "', because the source of a secondary edge points to a non existing node with id '"
+					+ e.getSource().getId() + "'.");
+		}
+		if (sTarget == null) {
+			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
+					+ "', because the target of a secondary edgepoints to a non existing node with id '"
+					+ e.getTarget().getId() + "'.");
+		}
+
+		// Despite the name, a "secondary edge" is actually like an EDU or a CDU (complex discourse unit).
+		// We therefore represent it with an SStructure with two pointing relations between it and its
+		// source and target nodes.
+		SStructure seNode = SaltFactory.createSStructure();
+		seNode.setName(e.getId());
+
+		SPointingRelation inbound = SaltFactory.createSPointingRelation();
+		inbound.setType(e.getRelationName() + "-in");
+		inbound.setName(e.getId() + "|secondary|in");
+		inbound.setSource(sSource);
+		inbound.setTarget(seNode);
+
+		SPointingRelation outbound = SaltFactory.createSPointingRelation();
+		outbound.setType(e.getRelationName() + "-out");
+		outbound.setName(e.getId() + "|secondary|out");
+		outbound.setSource(seNode);
+		outbound.setTarget(sTarget);
+
+		layer.addNode(seNode);
+		layer.addRelation(outbound);
+		layer.addRelation(inbound);
+		this.getDocument().getDocumentGraph().addNode(seNode);
+		this.getDocument().getDocumentGraph().addRelation(outbound);
+		this.getDocument().getDocumentGraph().addRelation(inbound);
+		this.rstId2SStructure.put(e.getId(), seNode);
 	}
 }
