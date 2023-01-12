@@ -17,6 +17,7 @@
  */
 package org.corpus_tools.peppermodules.rstModules;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
 import org.corpus_tools.salt.core.SLayer;
+import org.corpus_tools.salt.core.SRelation;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -66,17 +68,23 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.tokenizer = new Tokenizer();
 		this.rstId2SStructure = new Hashtable<>();
 		this.secondaryEdgeIndex = new Hashtable<>();
+		this.primaryEdgeIndex = new Hashtable<>();
+		this.primaryRelationsWithSignals = new HashSet<>();
+		this.secondaryRelationsWithSignals = new HashSet<>();
 	}
 
 	private RSTDocument currentRSTDocument = null;
 
 	public void setCurrentRSTDocument(RSTDocument currentRSTDocument) {
+		this.rstId2SStructure = new Hashtable<>();
+		this.secondaryEdgeIndex = new Hashtable<>();
+		this.primaryEdgeIndex = new Hashtable<>();
+		this.primaryRelationsWithSignals = new HashSet<>();
+		this.secondaryRelationsWithSignals = new HashSet<>();
 		this.currentRSTDocument = currentRSTDocument;
 	}
 
 	public RSTDocument getCurrentRSTDocument() {
-		this.rstId2SStructure = new Hashtable<>();
-		this.secondaryEdgeIndex = new Hashtable<>();
 		return this.currentRSTDocument;
 	}
 
@@ -93,6 +101,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		rstDocument = new RSTDocument(this.getResourceURI());
 		this.rstId2SStructure = new Hashtable<>();
 		this.secondaryEdgeIndex = new Hashtable<>();
+		this.primaryEdgeIndex = new Hashtable<>();
+		this.primaryRelationsWithSignals = new HashSet<>();
+		this.secondaryRelationsWithSignals = new HashSet<>();
 		this.mapSDocument(rstDocument);
 
 		return (DOCUMENT_STATUS.COMPLETED);
@@ -129,6 +140,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 		this.mapSecondaryEdges();
 		this.mapSignals();
+		if (((RSTImporterProperties) this.getProperties()).getMarkIsSignaled()) {
+			this.markEdgesWithSignals();
+		}
 	}
 
 	/**
@@ -146,6 +160,21 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 * Mapping from secondary edge ID to the SPointingRelation representing it
 	 */
 	private Hashtable<String, SPointingRelation> secondaryEdgeIndex = null;
+
+	/**
+	 * Contains primary edges which have at least one signal associated with them
+	 */
+	private HashSet<SDominanceRelation> primaryRelationsWithSignals = null;
+
+	/**
+	 * Contains secondary edges which have at least one signal associated with them
+	 */
+	private HashSet<SPointingRelation> secondaryRelationsWithSignals = null;
+
+	/**
+	 * Maps from IDs of discourse units to the relation which they are the child of
+	 */
+	private Hashtable<String, SDominanceRelation> primaryEdgeIndex = null;
 
 	/**
 	 * Returns the TreeTaggerTokenizer to tokenize an untokenized primary text.
@@ -363,12 +392,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			sDomRel.setSource(sSource);
 			sDomRel.setTarget(sTarget);
 			this.getDocument().getDocumentGraph().addRelation(sDomRel);
+			this.primaryEdgeIndex.put(relation.getChild().getId(), sDomRel);
 
-			if (relation.getName() != null)
-				sDomRel.createAnnotation(
-						null,
-						((RSTImporterProperties) this.getProperties()).getRelationName(),
-						relation.getName());
+			if (relation.getName() != null) {
+				String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
+				sDomRel.createAnnotation(null, relationNameKey, relation.getName());
+			}
 		}
 	}
 
@@ -405,7 +434,13 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		SPointingRelation secondaryEdge = this.secondaryEdgeIndex.get(signal.getSource().getId());
 
 		// If neither is true, throw
-		if (sSource == null && secondaryEdge == null) {
+		// Record that we have seen a signal for the given relation
+		if (sSource != null) {
+			SDominanceRelation r = this.primaryEdgeIndex.get(signal.getSource().getId());
+			this.primaryRelationsWithSignals.add(r);
+		} else if (secondaryEdge != null) {
+			this.secondaryRelationsWithSignals.add(secondaryEdge);
+		} else {
 			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
 					+ "', because the parent of a signal points to a non existing node with id '"
 					+ signal.getSource().getId() + "'.");
@@ -554,5 +589,14 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		ePR.setSource(sSource);
 		ePR.setTarget((sTarget));
 		this.getDocument().getDocumentGraph().addRelation(ePR);
+	}
+
+	private void markEdgesWithSignals() {
+		for (SDominanceRelation dr : this.getDocument().getDocumentGraph().getDominanceRelations()) {
+			dr.createAnnotation(null, "is_signaled", this.primaryRelationsWithSignals.contains(dr));
+		}
+		for (SPointingRelation sr : this.getDocument().getDocumentGraph().getPointingRelations()) {
+			sr.createAnnotation(null, "is_signaled", this.secondaryRelationsWithSignals.contains(sr));
+		}
 	}
 }
