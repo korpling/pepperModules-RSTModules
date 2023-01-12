@@ -521,6 +521,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		SPointingRelation ePR = SaltFactory.createSPointingRelation();
 		ePR.createAnnotation(null, "xml_id", e.getId());
 		ePR.createAnnotation(null, ((RSTImporterProperties) this.getProperties()).getRelationName(), e.getRelationName());
+		// For primary edges, this type is determined by the information in the <relations /> element in the header:
+		// multinuclear relations have type "multinuc", and all others have type "rst". Since secondary edges can
+		// never be multinuclear, we just set the type to "rst" here.
 		ePR.setType("rst");
 		ePR.setSource(sSource);
 		ePR.setTarget((sTarget));
