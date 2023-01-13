@@ -532,9 +532,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signal2target.setSource(signalNode);
 			signal2target.setTarget(seTarget);
 			String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
-			signal2source.createAnnotation("sec", "signal",
-					secondaryEdge.getAnnotation(relationNameKey).getValue());
-			signalNode.createAnnotation("sec", "signaled_relation", secondaryEdge.getName());
+			Object signaledRelation = secondaryEdge.getAnnotation(relationNameKey).getValue();
+			signal2source.createAnnotation("sec", "signal", signaledRelation);
+			signalNode.createAnnotation("sec", "signaled_relation", signaledRelation);
 			this.getDocument().getDocumentGraph().addRelation(signal2source);
 			this.getDocument().getDocumentGraph().addRelation(signal2target);
 			layer.addRelation(signal2source);
