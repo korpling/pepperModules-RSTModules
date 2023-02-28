@@ -31,8 +31,6 @@ import org.corpus_tools.salt.common.*;
 import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
-import org.corpus_tools.salt.core.SLayer;
-import org.corpus_tools.salt.core.SRelation;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -404,19 +402,13 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	private void mapSignals() {
 		List<Signal> signals = this.getCurrentRSTDocument().getSignals();
 		if (signals != null && signals.size() > 0) {
-			SLayer signalsLayer = SaltFactory.createSLayer();
-			String layerName = ((RSTImporterProperties) this.getProperties()).getSignalsLayerName();
-			signalsLayer.setName(layerName);
-
 			for (Signal signal : this.getCurrentRSTDocument().getSignals()) {
-				this.mapSignal(signal, signalsLayer);
+				this.mapSignal(signal);
 			}
-
-			this.getDocument().getDocumentGraph().addLayer(signalsLayer);
 		}
 	}
 
-	private void mapSignal(Signal signal, SLayer layer) {
+	private void mapSignal(Signal signal) {
 		// If the signal is null or its source attribute is null, quit
 		if (signal == null) {
 			return;
@@ -450,7 +442,6 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		SStructure signalNode = SaltFactory.createSStructure();
 		signalNode.createAnnotation(null, "signal_type", signal.getType());
 		signalNode.createAnnotation(null, "signal_subtype", signal.getSubtype());
-		layer.addNode(signalNode);
 		this.getDocument().getDocumentGraph().addNode(signalNode);
 
 		//////////////////////////////////////////////////////////////////////////////////
@@ -487,7 +478,6 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				tokRel.setTarget(sTokens.get(tokenId - 1));
 				tokRel.setType("signal_token");
 				tokRel.setSource(signalNode);
-				layer.addRelation(tokRel);
 				this.getDocument().getDocumentGraph().addRelation(tokRel);
 			}
 		}
@@ -518,7 +508,6 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				signalNode.createAnnotation("prim", "signaled_relation", incomingRelation.getName());
 			}
 
-			layer.addRelation(signal2rstNode);
 			this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
 		} else {
 			// If we have a secondary edge associated with the signal, then our strategy is going to be
@@ -537,8 +526,6 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signalNode.createAnnotation("sec", "signaled_relation", signaledRelation);
 			this.getDocument().getDocumentGraph().addRelation(signal2source);
 			this.getDocument().getDocumentGraph().addRelation(signal2target);
-			layer.addRelation(signal2source);
-			layer.addRelation(signal2target);
 		}
 	}
 
