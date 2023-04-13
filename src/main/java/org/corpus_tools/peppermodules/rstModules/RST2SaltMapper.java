@@ -17,9 +17,12 @@
  */
 package org.corpus_tools.peppermodules.rstModules;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
@@ -70,6 +73,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.primaryEdgeIndex = new Hashtable<>();
 		this.primaryRelationsWithSignals = new HashSet<>();
 		this.secondaryRelationsWithSignals = new HashSet<>();
+		this.signalsForSecondaryEdge = new HashMap<>();
 	}
 
 	private RSTDocument currentRSTDocument = null;
@@ -80,6 +84,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.primaryEdgeIndex = new Hashtable<>();
 		this.primaryRelationsWithSignals = new HashSet<>();
 		this.secondaryRelationsWithSignals = new HashSet<>();
+		this.signalsForSecondaryEdge = new HashMap<>();
 		this.currentRSTDocument = currentRSTDocument;
 	}
 
@@ -103,6 +108,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.primaryEdgeIndex = new Hashtable<>();
 		this.primaryRelationsWithSignals = new HashSet<>();
 		this.secondaryRelationsWithSignals = new HashSet<>();
+		this.signalsForSecondaryEdge = new HashMap<>();
 		this.mapSDocument(rstDocument);
 
 		return (DOCUMENT_STATUS.COMPLETED);
@@ -139,6 +145,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 		this.mapSecondaryEdges();
 		this.mapSignals();
+		this.connectSecondaryEdgesToSignals();
 		if (((RSTImporterProperties) this.getProperties()).getMarkIsSignaled()) {
 			this.markEdgesWithSignals();
 		}
@@ -158,7 +165,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
 	 * Mapping from secondary edge ID to the SPointingRelation representing it
 	 */
-	private Hashtable<String, SPointingRelation> secondaryEdgeIndex = null;
+	private Hashtable<String, SStructure> secondaryEdgeIndex = null;
 
 	/**
 	 * Contains primary edges which have at least one signal associated with them
@@ -168,7 +175,12 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	/**
 	 * Contains secondary edges which have at least one signal associated with them
 	 */
-	private HashSet<SPointingRelation> secondaryRelationsWithSignals = null;
+	private HashSet<SStructure> secondaryRelationsWithSignals = null;
+
+	/**
+	 * Maps from secondary edge IDs to a list of associated signals
+	 */
+	private Map<SStructure, List<SStructure>> signalsForSecondaryEdge = null;
 
 	/**
 	 * Maps from IDs of discourse units to the relation which they are the child of
@@ -424,7 +436,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		//////////////////////////////////////////////////////////////////////////////////
 		// Determine whether the signal is associated with a normal or a secondary edge
 		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
-		SPointingRelation secondaryEdge = this.secondaryEdgeIndex.get(signal.getSource().getId());
+		SStructure secondaryEdge = this.secondaryEdgeIndex.get(signal.getSource().getId());
 
 		// If neither is true, throw
 		// Record that we have seen a signal for the given relation
@@ -470,6 +482,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 
 		// also make the signal node dominate every token
+		int earliestToken = Integer.MAX_VALUE;
 		if (tokenIds != null) {
 			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
 			for (int tokenId : signal.getTokenIds()) {
@@ -480,6 +493,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				tokRel.setType("signal_token");
 				tokRel.setSource(signalNode);
 				this.getDocument().getDocumentGraph().addRelation(tokRel);
+				if (tokenId < earliestToken) {
+					earliestToken = tokenId;
+				}
 			}
 		}
 
@@ -508,13 +524,23 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				// also annotate the signal node itself
 				signalNode.createAnnotation("prim", "signaled_relation", incomingRelation.getName());
 			}
-
 			this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
 		} else {
 			// If we have a secondary edge associated with the signal, then our strategy is going to be
 			// different: the signal node will have two dominance relations, one for each of the SE's ends
-			SStructure seSource = (SStructure) secondaryEdge.getSource();
-			SStructure seTarget = (SStructure) secondaryEdge.getTarget();
+			SStructure seSource = null;
+			SStructure seTarget = null;
+			for (SRelation r : secondaryEdge.getOutRelations()) {
+				if (r instanceof SDominanceRelation) {
+					Object ann = r.getAnnotation(null, "end").getValue();
+					if (ann != null && ann.equals("source")) {
+						seSource = (SStructure) r.getTarget();
+					}
+					else if (ann != null && ann.equals("target")) {
+						seTarget = (SStructure) r.getTarget();
+					}
+				}
+			}
 			SDominanceRelation signal2source = SaltFactory.createSDominanceRelation();
 			SDominanceRelation signal2target = SaltFactory.createSDominanceRelation();
 			signal2source.setSource(signalNode);
@@ -522,11 +548,16 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			signal2target.setSource(signalNode);
 			signal2target.setTarget(seTarget);
 			String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
-			Object signaledRelation = secondaryEdge.getAnnotation(relationNameKey).getValue();
+			Object signaledRelation = secondaryEdge.getAnnotation("sec", relationNameKey).getValue();
 			signal2source.createAnnotation("sec", "signal", signaledRelation);
 			signalNode.createAnnotation("sec", "signaled_relation", signaledRelation);
 			this.getDocument().getDocumentGraph().addRelation(signal2source);
 			this.getDocument().getDocumentGraph().addRelation(signal2target);
+			if (!this.signalsForSecondaryEdge.containsKey(secondaryEdge)) {
+				this.signalsForSecondaryEdge.put(secondaryEdge, new ArrayList<>());
+			}
+			this.signalsForSecondaryEdge.get(secondaryEdge).add(signalNode);
+			signalNode.createProcessingAnnotation(null, "earliest_token", earliestToken);
 		}
 	}
 
@@ -566,38 +597,59 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ e.getTarget().getId() + "'.");
 		}
 
-
-		// Check if there is a co-extensive SDominanceRelation. If there is, then we will actually store the
-		// reverse of what we want. This helps with annoyances in ANNIS.
-		boolean reverse = false;
-		for (SRelation r : this.getDocument().getDocumentGraph().getNode(sSource.getId()).getOutRelations()) {
-			if (r instanceof SDominanceRelation && r.getTarget().equals(sTarget)) {
-				reverse = true;
-			}
-		}
-
-		SPointingRelation ePR = SaltFactory.createSPointingRelation();
-		this.secondaryEdgeIndex.put(e.getId(), ePR);
+		SStructure ses = SaltFactory.createSStructure();
+		this.secondaryEdgeIndex.put(e.getId(), ses);
 		String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
-		ePR.createAnnotation(null, relationNameKey, e.getRelationName());
-		if (reverse) {
-			ePR.createAnnotation(null, "reverse", "reverse");
-		}
-		// For primary edges, this type is determined by the information in the <relations /> element in the header:
-		// multinuclear relations have type "multinuc", and all others have type "rst". Since secondary edges can
-		// never be multinuclear, we just set the type to "rst" here.
-		ePR.setType("rst");
-		ePR.setSource(!reverse ? sSource : sTarget);
-		ePR.setTarget(!reverse ? sTarget : sSource);
-		this.getDocument().getDocumentGraph().addRelation(ePR);
+		ses.createAnnotation("sec", relationNameKey, e.getRelationName());
+
+		SDominanceRelation sourceRel = SaltFactory.createSDominanceRelation();
+		sourceRel.setSource(ses);
+		sourceRel.setTarget(sSource);
+		sourceRel.createAnnotation(null, "end", "source");
+
+		SDominanceRelation targetRel = SaltFactory.createSDominanceRelation();
+		targetRel.setSource(ses);
+		targetRel.setTarget(sTarget);
+		targetRel.createAnnotation(null, "end", "target");
+
+		this.getDocument().getDocumentGraph().addNode(ses);
+		this.getDocument().getDocumentGraph().addRelation(sourceRel);
+		this.getDocument().getDocumentGraph().addRelation(targetRel);
 	}
 
 	private void markEdgesWithSignals() {
 		for (SDominanceRelation dr : this.getDocument().getDocumentGraph().getDominanceRelations()) {
-			dr.createAnnotation(null, "is_signaled", this.primaryRelationsWithSignals.contains(dr));
+			if (! (dr.getTarget() instanceof SToken)
+					&& (dr.getSource().getAnnotation("sec", "signaled_relation") == null)
+					&& (dr.getSource().getAnnotation("prim", "signaled_relation") == null)
+					&& (dr.getSource().getAnnotation("sec", "relname") == null)) {
+				dr.createAnnotation(null, "is_signaled", this.primaryRelationsWithSignals.contains(dr));
+			}
 		}
-		for (SPointingRelation sr : this.getDocument().getDocumentGraph().getPointingRelations()) {
-			sr.createAnnotation(null, "is_signaled", this.secondaryRelationsWithSignals.contains(sr));
+	}
+
+	private void connectSecondaryEdgesToSignals() {
+		for (Map.Entry<SStructure, List<SStructure>> kvp : this.signalsForSecondaryEdge.entrySet()) {
+			SStructure secEdge = kvp.getKey();
+			List<SStructure> signals = kvp.getValue();
+
+			SStructure winningSignal = null;
+			int earliestToken = Integer.MAX_VALUE;
+			for (SStructure signal : signals) {
+				int signalEarliestToken = (Integer) signal.getProcessingAnnotation("earliest_token").getValue();
+				if (signalEarliestToken < earliestToken) {
+					earliestToken = signalEarliestToken;
+					winningSignal = signal;
+				}
+			}
+			// If we don't have any signal, we should really complain, but just be lenient and allow secedges
+			// without any signals
+			if (winningSignal != null) {
+				SDominanceRelation r = SaltFactory.createSDominanceRelation();
+				r.setSource(secEdge);
+				r.setTarget(winningSignal);
+				this.getDocument().getDocumentGraph().addRelation(r);
+			}
 		}
 	}
 }
