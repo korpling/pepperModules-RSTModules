@@ -31,6 +31,7 @@ import org.corpus_tools.salt.common.*;
 import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
+import org.corpus_tools.salt.core.SRelation;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -565,16 +566,29 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ e.getTarget().getId() + "'.");
 		}
 
+
+		// Check if there is a co-extensive SDominanceRelation. If there is, then we will actually store the
+		// reverse of what we want. This helps with annoyances in ANNIS.
+		boolean reverse = false;
+		for (SRelation r : this.getDocument().getDocumentGraph().getNode(sSource.getId()).getOutRelations()) {
+			if (r instanceof SDominanceRelation && r.getTarget().equals(sTarget)) {
+				reverse = true;
+			}
+		}
+
 		SPointingRelation ePR = SaltFactory.createSPointingRelation();
 		this.secondaryEdgeIndex.put(e.getId(), ePR);
 		String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
 		ePR.createAnnotation(null, relationNameKey, e.getRelationName());
+		if (reverse) {
+			ePR.createAnnotation(null, "reverse", "reverse");
+		}
 		// For primary edges, this type is determined by the information in the <relations /> element in the header:
 		// multinuclear relations have type "multinuc", and all others have type "rst". Since secondary edges can
 		// never be multinuclear, we just set the type to "rst" here.
 		ePR.setType("rst");
-		ePR.setSource(sSource);
-		ePR.setTarget((sTarget));
+		ePR.setSource(!reverse ? sSource : sTarget);
+		ePR.setTarget(!reverse ? sTarget : sSource);
 		this.getDocument().getDocumentGraph().addRelation(ePR);
 	}
 
