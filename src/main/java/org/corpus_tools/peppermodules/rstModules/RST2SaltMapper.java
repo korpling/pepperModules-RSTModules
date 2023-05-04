@@ -17,12 +17,7 @@
  */
 package org.corpus_tools.peppermodules.rstModules;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.corpus_tools.pepper.common.DOCUMENT_STATUS;
 import org.corpus_tools.pepper.impl.PepperMapperImpl;
@@ -34,7 +29,7 @@ import org.corpus_tools.salt.common.*;
 import org.corpus_tools.salt.common.tokenizer.SimpleTokenizer;
 import org.corpus_tools.salt.common.tokenizer.Tokenizer;
 import org.corpus_tools.salt.core.SAnnotation;
-import org.corpus_tools.salt.core.SRelation;
+import org.corpus_tools.salt.core.SNode;
 
 /**
  * Maps a Rst-Document (RSTDocument) to a Salt document (SDocument).
@@ -69,22 +64,16 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	private void init() {
 		this.tokenizer = new Tokenizer();
 		this.rstId2SStructure = new Hashtable<>();
-		this.secondaryEdgeIndex = new Hashtable<>();
+		this.rstId2UUID = new Hashtable<>();
 		this.primaryEdgeIndex = new Hashtable<>();
-		this.primaryRelationsWithSignals = new HashSet<>();
-		this.secondaryRelationsWithSignals = new HashSet<>();
-		this.signalsForSecondaryEdge = new HashMap<>();
 	}
 
 	private RSTDocument currentRSTDocument = null;
 
 	public void setCurrentRSTDocument(RSTDocument currentRSTDocument) {
 		this.rstId2SStructure = new Hashtable<>();
-		this.secondaryEdgeIndex = new Hashtable<>();
+		this.rstId2UUID = new Hashtable<>();
 		this.primaryEdgeIndex = new Hashtable<>();
-		this.primaryRelationsWithSignals = new HashSet<>();
-		this.secondaryRelationsWithSignals = new HashSet<>();
-		this.signalsForSecondaryEdge = new HashMap<>();
 		this.currentRSTDocument = currentRSTDocument;
 	}
 
@@ -104,11 +93,8 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		RSTDocument rstDocument;
 		rstDocument = new RSTDocument(this.getResourceURI());
 		this.rstId2SStructure = new Hashtable<>();
-		this.secondaryEdgeIndex = new Hashtable<>();
+		this.rstId2UUID = new Hashtable<>();
 		this.primaryEdgeIndex = new Hashtable<>();
-		this.primaryRelationsWithSignals = new HashSet<>();
-		this.secondaryRelationsWithSignals = new HashSet<>();
-		this.signalsForSecondaryEdge = new HashMap<>();
 		this.mapSDocument(rstDocument);
 
 		return (DOCUMENT_STATUS.COMPLETED);
@@ -143,12 +129,10 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		for (Relation relation : this.getCurrentRSTDocument().getRelations()) {
 			this.mapRelation(relation);
 		}
-		this.mapSecondaryEdges();
-		this.mapSignals();
-		this.connectSecondaryEdgesToSignals();
-		if (((RSTImporterProperties) this.getProperties()).getMarkIsSignaled()) {
-			this.markEdgesWithSignals();
-		}
+
+		this.markTokens();
+		this.markSecondaryEdges();
+		this.markSignals();
 	}
 
 	/**
@@ -163,24 +147,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	private Tokenizer tokenizer = null;
 
 	/**
-	 * Mapping from secondary edge ID to the SPointingRelation representing it
-	 */
-	private Hashtable<String, SStructure> secondaryEdgeIndex = null;
-
-	/**
-	 * Contains primary edges which have at least one signal associated with them
-	 */
-	private HashSet<SDominanceRelation> primaryRelationsWithSignals = null;
-
-	/**
-	 * Contains secondary edges which have at least one signal associated with them
-	 */
-	private HashSet<SStructure> secondaryRelationsWithSignals = null;
-
-	/**
 	 * Maps from secondary edge IDs to a list of associated signals
 	 */
-	private Map<SStructure, List<SStructure>> signalsForSecondaryEdge = null;
+	private Map<String, UUID> rstId2UUID = null;
 
 	/**
 	 * Maps from IDs of discourse units to the relation which they are the child of
@@ -271,6 +240,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 					// puts segment.id and mapped SStructure-object into table
 					this.rstId2SStructure.put(segment.getId(), sStruct);
+					UUID uuid = UUID.randomUUID();
+					sStruct.createAnnotation("TEMP", "uuid", uuid);
+					this.rstId2UUID.put(segment.getId(), uuid);
 					this.getDocument().getDocumentGraph().addNode(sStruct);
 
 					for (SToken sToken : tokens) {// put each token in
@@ -316,6 +288,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 				sStruct.setName(segment.getId());
 				// puts segment.id and mapped SStructure-object into table
 				this.rstId2SStructure.put(segment.getId(), sStruct);
+				UUID uuid = UUID.randomUUID();
+				sStruct.createAnnotation("TEMP", "uuid", uuid);
+				this.rstId2UUID.put(segment.getId(), uuid);
 				this.getDocument().getDocumentGraph().addNode(sStruct);
 
 				SToken sToken = SaltFactory.createSToken();
@@ -359,6 +334,9 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 			// puts segment.id and mapped SSTructure-object into table
 			this.rstId2SStructure.put(group.getId(), sStructure);
+			UUID uuid = UUID.randomUUID();
+			sStructure.createAnnotation("TEMP", "uuid", uuid);
+			this.rstId2UUID.put(group.getId(), uuid);
 
 			{// create SAnnotation containing the group as value
 				SAnnotation sAnno = SaltFactory.createSAnnotation();
@@ -412,16 +390,16 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 	}
 
-	private void mapSignals() {
+	private void markSignals() {
 		List<Signal> signals = this.getCurrentRSTDocument().getSignals();
 		if (signals != null && signals.size() > 0) {
 			for (Signal signal : this.getCurrentRSTDocument().getSignals()) {
-				this.mapSignal(signal);
+				this.markSignal(signal);
 			}
 		}
 	}
 
-	private void mapSignal(Signal signal) {
+	private void markSignal(Signal signal) {
 		// If the signal is null or its source attribute is null, quit
 		if (signal == null) {
 			return;
@@ -431,146 +409,47 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ "', because the source of a signal is empty.");
 		}
 
-		//////////////////////////////////////////////////////////////////////////////////
-		// Signal node setup
-		//////////////////////////////////////////////////////////////////////////////////
-		// Determine whether the signal is associated with a normal or a secondary edge
-		SStructure sSource = this.rstId2SStructure.get(signal.getSource().getId());
-		SStructure secondaryEdge = this.secondaryEdgeIndex.get(signal.getSource().getId());
+		String sourceId = signal.getSource().getId();
+		sourceId = sourceId.contains("-") ? sourceId.split("-")[0] : sourceId;
+		SNode n = this.rstId2SStructure.get(sourceId);
+		if (n.getAnnotation("TEMP", "signals") == null) {
+			n.createAnnotation("TEMP", "signals", new ArrayList<Map<Object, Object>>());
+		}
+		List<Map<Object, Object>> signalList = (List<Map<Object, Object>>) n.getAnnotation("TEMP", "signals").getValue();
+		Map<Object, Object> signalMap = new HashMap<>();
+		List<UUID> tokenIds = new ArrayList<>();
+		if (signal.getTokenIds() != null) {
+			for (Integer tid : signal.getTokenIds()) {
+				tokenIds.add(this.rstId2UUID.get("token" + tid));
+			}
+		}
+		signalMap.put("signal:type", signal.getType());
+		signalMap.put("signal:subtype", signal.getSubtype());
+		signalMap.put("signal:tokens", signal.getTokenIds());
 
-		// If neither is true, throw
-		// Record that we have seen a signal for the given relation
-		if (sSource != null) {
-			SDominanceRelation r = this.primaryEdgeIndex.get(signal.getSource().getId());
-			this.primaryRelationsWithSignals.add(r);
-		} else if (secondaryEdge != null) {
-			this.secondaryRelationsWithSignals.add(secondaryEdge);
+		List<UUID> source = new ArrayList<>();
+		if (signal.getSource().getId().contains("-")) {
+			String part1 = signal.getSource().getId().split("-")[0];
+			String part2 = signal.getSource().getId().split("-")[1];
+			source.add(this.rstId2UUID.get(part1));
+			source.add(this.rstId2UUID.get(part2));
 		} else {
-			throw new PepperModuleException(this, "Cannot map the rst-model of file'" + this.getResourceURI()
-					+ "', because the parent of a signal points to a non existing node with id '"
-					+ signal.getSource().getId() + "'.");
+			source.add(this.rstId2UUID.get(signal.getSource().getId()));
 		}
-
-		// create node representing the signal
-		SStructure signalNode = SaltFactory.createSStructure();
-		signalNode.createAnnotation(null, "signal_type", signal.getType());
-		signalNode.createAnnotation(null, "signal_subtype", signal.getSubtype());
-		this.getDocument().getDocumentGraph().addNode(signalNode);
-
-		//////////////////////////////////////////////////////////////////////////////////
-		// Token handling
-		//////////////////////////////////////////////////////////////////////////////////
-		// add annotations to the signal node: signal_text for space-separated tokens, signal_indexes for their indexes
-		List<Integer> tokenIds = signal.getTokenIds();
-		List<SToken> tokens = this.getDocument().getDocumentGraph().getTokens();
-		if (tokenIds != null) {
-			StringBuilder tokenTextSb = new StringBuilder();
-			StringBuilder tokenIndexesSb = new StringBuilder();
-			for (int i = 0; i < tokenIds.size(); i++) {
-				SToken token = tokens.get(tokenIds.get(i) - 1);
-				String tokenText = getDocument().getDocumentGraph().getText(token);
-
-				tokenTextSb.append(tokenText);
-				tokenIndexesSb.append(tokenIds.get(i).toString());
-				if (i < tokenIds.size() - 1) {
-					tokenTextSb.append(" ");
-					tokenIndexesSb.append(" ");
-				}
-			}
-			signalNode.createAnnotation(null, "signal_text", tokenTextSb.toString());
-			signalNode.createAnnotation(null, "signal_indexes", tokenIndexesSb.toString());
-		}
-
-		// also make the signal node dominate every token
-		int earliestToken = Integer.MAX_VALUE;
-		if (tokenIds != null) {
-			List<SToken> sTokens = this.getDocument().getDocumentGraph().getTokens();
-			for (int tokenId : signal.getTokenIds()) {
-				SDominanceRelation tokRel = SaltFactory.createSDominanceRelation();
-				tokRel.setSource(signalNode);
-				// tokens are 1-indexed, list is 0-indexed
-				tokRel.setTarget(sTokens.get(tokenId - 1));
-				tokRel.setType("signal_token");
-				tokRel.setSource(signalNode);
-				this.getDocument().getDocumentGraph().addRelation(tokRel);
-				if (tokenId < earliestToken) {
-					earliestToken = tokenId;
-				}
-			}
-		}
-
-		//////////////////////////////////////////////////////////////////////////////////
-		// Signal to other node relation creation
-		//////////////////////////////////////////////////////////////////////////////////
-		if (secondaryEdge == null) {
-			// make the signal node dominate the RST node that it is associated with. When
-			// RST is represented graphically, this is the node that the arrow points out of,
-			// but in Salt, it is the node that is the child of a dominance relation
-			SDominanceRelation signal2rstNode = SaltFactory.createSDominanceRelation();
-			String associatedSignalNodeId = signal.getSource().getId();
-			signal2rstNode.setSource(signalNode);
-			signal2rstNode.setTarget(sSource);
-
-			// If the discourse unit associated with this signal has a parent (i.e., it is
-			// the satellite of a nucleus), then we want to add some additional annotations.
-			// Specifically, we want to add the name of the relation to the signal relation,
-			// and we want to annotate teh signal node with the name of the relation.
-			List<Relation> incomingRelations = this.getCurrentRSTDocument()
-					.getIncomingRelations(associatedSignalNodeId);
-			if (incomingRelations != null && incomingRelations.size() > 0) {
-				Relation incomingRelation = incomingRelations.get(0);
-				// annotate the edge connecting signal and rst node
-				signal2rstNode.createAnnotation("prim", "signal", incomingRelation.getName());
-				// also annotate the signal node itself
-				signalNode.createAnnotation("prim", "signaled_relation", incomingRelation.getName());
-			}
-			this.getDocument().getDocumentGraph().addRelation(signal2rstNode);
-		} else {
-			// If we have a secondary edge associated with the signal, then our strategy is going to be
-			// different: the signal node will have two dominance relations, one for each of the SE's ends
-			SStructure seSource = null;
-			SStructure seTarget = null;
-			for (SRelation r : secondaryEdge.getOutRelations()) {
-				if (r instanceof SDominanceRelation) {
-					Object ann = r.getAnnotation(null, "end").getValue();
-					if (ann != null && ann.equals("source")) {
-						seSource = (SStructure) r.getTarget();
-					}
-					else if (ann != null && ann.equals("target")) {
-						seTarget = (SStructure) r.getTarget();
-					}
-				}
-			}
-			SDominanceRelation signal2source = SaltFactory.createSDominanceRelation();
-			SDominanceRelation signal2target = SaltFactory.createSDominanceRelation();
-			signal2source.setSource(signalNode);
-			signal2source.setTarget(seSource);
-			signal2target.setSource(signalNode);
-			signal2target.setTarget(seTarget);
-			String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
-			Object signaledRelation = secondaryEdge.getAnnotation("sec", relationNameKey).getValue();
-			signal2source.createAnnotation("sec", "signal", signaledRelation);
-			signalNode.createAnnotation("sec", "signaled_relation", signaledRelation);
-			this.getDocument().getDocumentGraph().addRelation(signal2source);
-			this.getDocument().getDocumentGraph().addRelation(signal2target);
-			if (!this.signalsForSecondaryEdge.containsKey(secondaryEdge)) {
-				this.signalsForSecondaryEdge.put(secondaryEdge, new ArrayList<>());
-			}
-			this.signalsForSecondaryEdge.get(secondaryEdge).add(signalNode);
-			signalNode.createProcessingAnnotation(null, "earliest_token", earliestToken);
-		}
+		signalMap.put("signal:source", source);
+		signalList.add(signalMap);
 	}
 
-	private void mapSecondaryEdges() {
-		List<SecondaryEdge> secondaryEdges = this.getCurrentRSTDocument().getSecondaryEdges();
+	private void markSecondaryEdges() {
+	List<SecondaryEdge> secondaryEdges = this.getCurrentRSTDocument().getSecondaryEdges();
 		if (secondaryEdges != null && secondaryEdges.size() > 0) {
 			for (SecondaryEdge e : this.getCurrentRSTDocument().getSecondaryEdges()) {
-				this.mapSecondaryEdge(e);
+				this.markSecondaryEdge(e);
 			}
 		}
 	}
 
-	private void mapSecondaryEdge(SecondaryEdge e) {
+	private void markSecondaryEdge(SecondaryEdge e) {
 		if (e == null) {
 			return;
 		}
@@ -597,59 +476,22 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					+ e.getTarget().getId() + "'.");
 		}
 
-		SStructure ses = SaltFactory.createSStructure();
-		this.secondaryEdgeIndex.put(e.getId(), ses);
-		String relationNameKey = ((RSTImporterProperties) this.getProperties()).getRelationName();
-		ses.createAnnotation("sec", relationNameKey, e.getRelationName());
-
-		SDominanceRelation sourceRel = SaltFactory.createSDominanceRelation();
-		sourceRel.setSource(ses);
-		sourceRel.setTarget(sSource);
-		sourceRel.createAnnotation(null, "end", "source");
-
-		SDominanceRelation targetRel = SaltFactory.createSDominanceRelation();
-		targetRel.setSource(ses);
-		targetRel.setTarget(sTarget);
-		targetRel.createAnnotation(null, "end", "target");
-
-		this.getDocument().getDocumentGraph().addNode(ses);
-		this.getDocument().getDocumentGraph().addRelation(sourceRel);
-		this.getDocument().getDocumentGraph().addRelation(targetRel);
-	}
-
-	private void markEdgesWithSignals() {
-		for (SDominanceRelation dr : this.getDocument().getDocumentGraph().getDominanceRelations()) {
-			if (! (dr.getTarget() instanceof SToken)
-					&& (dr.getSource().getAnnotation("sec", "signaled_relation") == null)
-					&& (dr.getSource().getAnnotation("prim", "signaled_relation") == null)
-					&& (dr.getSource().getAnnotation("sec", "relname") == null)) {
-				dr.createAnnotation(null, "is_signaled", this.primaryRelationsWithSignals.contains(dr));
-			}
+		if (sSource.getAnnotation("TEMP", "secedges") == null) {
+			sSource.createAnnotation("TEMP", "secedges", new ArrayList<Map<String, String>>());
 		}
+		Map<String, Object> sMap = new HashMap<>();
+		sMap.put("edgeSource", this.rstId2UUID.get(e.getId().split("-")[0]));
+		sMap.put("edgeTarget", this.rstId2UUID.get(e.getId().split("-")[1]));
+		sMap.put("relationName", e.getRelationName());
+		((List<Map<String, Object>>) sSource.getAnnotation("TEMP", "secedges").getValue()).add(sMap);
 	}
 
-	private void connectSecondaryEdgesToSignals() {
-		for (Map.Entry<SStructure, List<SStructure>> kvp : this.signalsForSecondaryEdge.entrySet()) {
-			SStructure secEdge = kvp.getKey();
-			List<SStructure> signals = kvp.getValue();
-
-			SStructure winningSignal = null;
-			int earliestToken = Integer.MAX_VALUE;
-			for (SStructure signal : signals) {
-				int signalEarliestToken = (Integer) signal.getProcessingAnnotation("earliest_token").getValue();
-				if (signalEarliestToken < earliestToken) {
-					earliestToken = signalEarliestToken;
-					winningSignal = signal;
-				}
-			}
-			// If we don't have any signal, we should really complain, but just be lenient and allow secedges
-			// without any signals
-			if (winningSignal != null) {
-				SDominanceRelation r = SaltFactory.createSDominanceRelation();
-				r.setSource(secEdge);
-				r.setTarget(winningSignal);
-				this.getDocument().getDocumentGraph().addRelation(r);
-			}
+	private void markTokens() {
+		int i = 1;
+		for (SToken t : getDocument().getDocumentGraph().getTokens()) {
+			UUID uuid = UUID.randomUUID();
+			t.createAnnotation("TEMP", "uuid", uuid);
+			this.rstId2UUID.put("token" + i++, uuid);
 		}
 	}
 }
