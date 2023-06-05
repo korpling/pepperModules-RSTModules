@@ -425,7 +425,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		}
 		signalMap.put("signal:type", signal.getType());
 		signalMap.put("signal:subtype", signal.getSubtype());
-		signalMap.put("signal:tokens", signal.getTokenIds());
+		signalMap.put("signal:tokens", tokenIds);
 
 		List<UUID> source = new ArrayList<>();
 		if (signal.getSource().getId().contains("-")) {
@@ -492,6 +492,11 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			UUID uuid = UUID.randomUUID();
 			t.createAnnotation("TEMP", "uuid", uuid);
 			this.rstId2UUID.put("token" + i++, uuid);
+		}
+
+		SNode n = getDocument().getDocumentGraph().getNodes().get(0);
+		if (n != null) {
+			n.createAnnotation("TEMP", "rstid2uuid", this.rstId2UUID);
 		}
 	}
 }
