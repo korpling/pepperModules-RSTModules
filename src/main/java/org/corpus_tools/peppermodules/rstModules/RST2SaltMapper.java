@@ -113,7 +113,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 		this.setCurrentRSTDocument(rstDocument);
 
 		// map segments to STextualDS, Tokens and SStructures
-		if (this.getCurrentRSTDocument().getSegments().size() > 0) {
+		if (!this.getCurrentRSTDocument().getSegments().isEmpty()) {
 			if (((RSTImporterProperties) this.getProperties()).isToTokenize())
 				this.mapSegmentsWithTokenize(this.getCurrentRSTDocument().getSegments());
 			else
@@ -197,7 +197,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 			seps = ((RSTImporterProperties)getProperties()).getSimpleTokenizationSeparators()
 					.toArray(new Character[simpleTokenizationSeparators.size()]);
 		}
-		if ((segments != null) && (segments.size() > 0)) {
+		if ((segments != null) && (!segments.isEmpty())) {
 			sText = SaltFactory.createSTextualDS();
 			this.getDocument().getDocumentGraph().addNode(sText);
 			// StringBuffer strBuffer= new StringBuffer();
@@ -229,7 +229,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 					// the normal Tokenizer actually returns the tokens
 					tokens = tokenizer.tokenize(sText, null, start, end);
 				}
-				if ((tokens != null) && (tokens.size() > 0)) {// if tokens exist
+				if ((tokens != null) && (!tokens.isEmpty())) {// if tokens exist
 					SStructure sStruct = SaltFactory.createSStructure();
 					sStruct.setName(segment.getId());
 					String nodeKindKey = ((RSTImporterProperties) this.getProperties()).getNodeKindName();
@@ -269,7 +269,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 	 */
 	private void mapSegmentsWithoutTokenize(List<Segment> segments) {
 		STextualDS sText = null;
-		if ((segments != null) && (segments.size() > 0)) {
+		if ((segments != null) && (!segments.isEmpty())) {
 			sText = SaltFactory.createSTextualDS();
 			this.getDocument().getDocumentGraph().addNode(sText);
 			StringBuffer strBuffer = new StringBuffer();
@@ -392,7 +392,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 	private void markSignals() {
 		List<Signal> signals = this.getCurrentRSTDocument().getSignals();
-		if (signals != null && signals.size() > 0) {
+		if (signals != null && !signals.isEmpty()) {
 			for (Signal signal : this.getCurrentRSTDocument().getSignals()) {
 				this.markSignal(signal);
 			}
@@ -442,7 +442,7 @@ public class RST2SaltMapper extends PepperMapperImpl implements PepperMapper {
 
 	private void markSecondaryEdges() {
 	List<SecondaryEdge> secondaryEdges = this.getCurrentRSTDocument().getSecondaryEdges();
-		if (secondaryEdges != null && secondaryEdges.size() > 0) {
+		if (secondaryEdges != null && !secondaryEdges.isEmpty()) {
 			for (SecondaryEdge e : this.getCurrentRSTDocument().getSecondaryEdges()) {
 				this.markSecondaryEdge(e);
 			}
