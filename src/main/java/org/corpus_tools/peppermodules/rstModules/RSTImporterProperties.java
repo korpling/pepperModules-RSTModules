@@ -28,7 +28,7 @@ import org.corpus_tools.salt.core.SAnnotation;
 /**
  * Defines the properties to be used for the {@link RSTImporter}.
  * 
- * @author Florian Zipser
+ * @author Florian Zipser, Luke Gessler
  *
  */
 @SuppressWarnings("serial")
@@ -72,10 +72,10 @@ public class RSTImporterProperties extends PepperModuleProperties {
 	public final static String PROP_SEGMENT_SEPARATOR = PREFIX + "segmentSeparator";
 
 	/**
-	 * Name of the property to specify the name of the SLayer that contains
-	 * signals.
+	 * yes/no property which adds an is_signaled annotation to edges indicating whether it has an associated
+	 * signal when set to yes
 	 */
-	public final static String PROP_SIGNALS_LAYER_NAME = PREFIX + "signalsLayerName";
+	public final static String PROP_MARK_IS_SIGNALED = PREFIX + "markIsSignaled";
 
 	public RSTImporterProperties() {
 		this.addProperty(new PepperModuleProperty<String>(PROP_TOKENIZE, String.class, "Determines if the rst data have to be tokenized during import. Possible values are 'yes' and 'no'.", "yes", false));
@@ -84,7 +84,7 @@ public class RSTImporterProperties extends PepperModuleProperties {
 		this.addProperty(new PepperModuleProperty<String>(PROP_NODE_TYPE_NAME, String.class, "Specifies the sName of the SAnnotation to which the type attribute of a node is mapped to.", "type", false));
 		this.addProperty(new PepperModuleProperty<String>(PROP_RELATION_NAME, String.class, "Specifies the sName of the SAnnotation to which the name attribute of a relation is mapped to.", "relname", false));
 		this.addProperty(new PepperModuleProperty<String>(PROP_SEGMENT_SEPARATOR, String.class, "A property to add a a separator like a blank between the text of segments, when it is concatenated to the primary text in STextualDS.For instance the segment text 'Is' of segment1 and the segment text 'this' of segment2 will be concatenated to an sText value 'is'SEPARATOR'this'.", " ", false));
-		this.addProperty(new PepperModuleProperty<String>(PROP_SIGNALS_LAYER_NAME, String.class, "Specifies the name of the SLayer that will contain SNodes generated from signal elements.", "signals", false));
+		this.addProperty(new PepperModuleProperty<String>(PROP_MARK_IS_SIGNALED, String.class, "When set to 'yes', adds a new annotation 'is_signaled' to each edge indicating whether there is at least one signal associated with it.", "no", false));
 	}
 
 	// ================================================ start: tokenizing
@@ -179,8 +179,8 @@ public class RSTImporterProperties extends PepperModuleProperties {
 		return (sep);
 	}
 
-	public String getSignalsLayerName() {
-		String layerName = ((String) this.getProperty(PROP_SIGNALS_LAYER_NAME).getValue());
-		return (layerName);
+	public boolean getMarkIsSignaled() {
+		String markIsSignaled = ((String) this.getProperty(PROP_MARK_IS_SIGNALED).getValue());
+		return markIsSignaled.equalsIgnoreCase("yes");
 	}
 }

@@ -35,6 +35,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(name = "RSTImporterComponent", factory = "PepperImporterComponentFactory")
 public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 	public static final String FILE_ENDING_RS3 = "rs3";
+	public static final String FILE_ENDING_RS4 = "rs4";
 
 	public RSTImporter() {
 		super();
@@ -45,9 +46,11 @@ public class RSTImporter extends PepperImporterImpl implements PepperImporter {
 		setDesc("This importer transforms data in rs3 format produced by the RST Tool (see: http://www.wagsoft.com/RSTTool/) to a Salt model.");
 		// set list of formats supported by this module
 		addSupportedFormat("rs3", "1.0", null);
+		addSupportedFormat("rs4", "1.0", null);
 		// set empty property object to be filled via pepper-framework
 		setProperties(new RSTImporterProperties());
 		getDocumentEndings().add(FILE_ENDING_RS3);
+		getDocumentEndings().add(FILE_ENDING_RS4);
 	}
 
 	/** resourceSet for loading EMF models **/
